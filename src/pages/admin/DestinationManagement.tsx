@@ -16,6 +16,7 @@ interface Destination {
   features: string[];
   category: string;
   createdAt: Timestamp;
+  featured: boolean;
 }
 
 const DestinationManagement = () => {
@@ -28,6 +29,7 @@ const DestinationManagement = () => {
   const [rating, setRating] = useState('5');
   const [features, setFeatures] = useState('');
   const [category, setCategory] = useState('popular');
+  const [featured, setFeatured] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -68,6 +70,7 @@ const DestinationManagement = () => {
     setRating('5');
     setFeatures('');
     setCategory('spiritual');
+    setFeatured(false);
     setEditingDestination(null);
     setError('');
     setSuccess('');
@@ -99,6 +102,7 @@ const DestinationManagement = () => {
         rating: Number(rating),
         features: features.split(',').map(f => f.trim()).filter(f => f),
         category,
+        featured,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
         authorId: currentUser.uid,
@@ -136,6 +140,7 @@ const DestinationManagement = () => {
     setRating(destination.rating.toString());
     setFeatures(destination.features.join(', '));
     setCategory(destination.category);
+    setFeatured(destination.featured || false);
     setError('');
     setSuccess('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -154,6 +159,22 @@ const DestinationManagement = () => {
     } catch (err) {
       console.error('Error deleting destination:', err);
       setError('Failed to delete destination. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleFeatured = async (destinationId: string, currentFeatured: boolean) => {
+    try {
+      setLoading(true);
+      await updateDoc(doc(db, 'destinations', destinationId), {
+        featured: !currentFeatured
+      });
+      setSuccess('Destination featured status updated successfully!');
+      fetchDestinations();
+    } catch (err) {
+      console.error('Error updating featured status:', err);
+      setError('Failed to update featured status. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -260,6 +281,18 @@ const DestinationManagement = () => {
               ))}
             </select>
           </div>
+
+          <div>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={featured}
+                onChange={(e) => setFeatured(e.target.checked)}
+                className="form-checkbox h-5 w-5 text-blue-600"
+              />
+              <span>Featured Destination</span>
+            </label>
+          </div>
         </div>
 
         <div>
@@ -331,7 +364,14 @@ const DestinationManagement = () => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
-                  <h4 className="text-lg font-semibold mb-2">{destination.name}</h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-lg font-semibold">{destination.name}</h4>
+                    {destination.featured && (
+                      <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
+                        Featured
+                      </span>
+                    )}
+                  </div>
                   <p className="text-gray-600 text-sm mb-2">{destination.location}</p>
                   <p className="text-gray-700 mb-2">₹{destination.price.toLocaleString()}</p>
                   <div className="flex justify-between items-center">
@@ -340,6 +380,16 @@ const DestinationManagement = () => {
                       <span className="ml-1">{destination.rating}</span>
                     </div>
                     <div className="space-x-2">
+                      <button
+                        onClick={() => handleToggleFeatured(destination.id, destination.featured || false)}
+                        className={`px-3 py-1 rounded text-sm ${
+                          destination.featured
+                            ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                        }`}
+                      >
+                        {destination.featured ? 'Unfeature' : 'Feature'}
+                      </button>
                       <button
                         onClick={() => handleEdit(destination)}
                         className="text-blue-600 hover:text-blue-800"

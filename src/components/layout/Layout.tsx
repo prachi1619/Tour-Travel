@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaSun, FaMoon, FaSearch, FaUser } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import ProfileAvatar from '../common/ProfileAvatar';
 import '../../styles/globals.css';
 
 interface LayoutProps {
@@ -11,6 +12,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const location = useLocation();
   const { currentUser, logout, isAdmin } = useAuth();
 
@@ -30,7 +32,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const menuItems = [
     { path: '/', label: 'Home' },
     { path: '/destinations', label: 'Destinations' },
-    { path: '/themes', label: 'Themes' },
     { path: '/blog', label: 'Blog' },
     { path: '/tools', label: 'Travel Tools' },
     { path: '/sitemap', label: 'Sitemap' },
@@ -85,36 +86,65 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
 
               {currentUser ? (
-                <div className="relative group">
-                  <button className="p-2 hover:text-primary transition-colors">
-                    <img
-                      src={currentUser.photoURL || 'https://via.placeholder.com/32'}
-                      alt={currentUser.displayName || 'User'}
-                      className="w-8 h-8 rounded-full"
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="p-2 hover:text-primary transition-colors focus:outline-none"
+                  >
+                    <ProfileAvatar
+                      src={currentUser.photoURL}
+                      name={currentUser.displayName || 'User'}
+                      size="sm"
                     />
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 card hidden group-hover:block">
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm hover:text-primary transition-colors"
-                    >
-                      Profile
-                    </Link>
-                    {isAdmin() && (
-                      <Link
-                        to="/admin"
-                        className="block px-4 py-2 text-sm hover:text-primary transition-colors"
-                      >
-                        Admin Dashboard
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:text-red-700 transition-colors"
-                    >
-                      Logout
-                    </button>
-                  </div>
+                  {isProfileOpen && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-10"
+                        onClick={() => setIsProfileOpen(false)}
+                      ></div>
+                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-20 py-2">
+                        <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center gap-3">
+                            <ProfileAvatar
+                              src={currentUser.photoURL}
+                              name={currentUser.displayName || 'User'}
+                              size="sm"
+                            />
+                            <div className="truncate">
+                              <div className="font-medium text-sm">{currentUser.displayName || 'User'}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{currentUser.email}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          Profile
+                        </Link>
+                        {isAdmin() && (
+                          <Link
+                            to="/admin"
+                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            onClick={() => setIsProfileOpen(false)}
+                          >
+                            Admin Dashboard
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setIsProfileOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : (
                 <Link

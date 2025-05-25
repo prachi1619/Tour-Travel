@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { FaHome, FaCompass, FaBlog, FaSearch, FaUsers, FaUser } from 'react-icons/fa';

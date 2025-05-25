@@ -68,7 +68,6 @@ import DestinationManagement from './pages/admin/DestinationManagement';
 import BlogManagement from './pages/admin/BlogManagement';
 import AddSampleData from './pages/admin/AddSampleData';
 import SitemapPage from './pages/SitemapPage';
-import ThemesPage from './pages/ThemesPage';
 import ToolsPage from './pages/ToolsPage';
 
 function App() {
@@ -135,8 +134,6 @@ function App() {
             <Route path="/cancellation" element={<CancellationPage />} />
             <Route path="/refund" element={<RefundPage />} />
 
-            //Theme Tools and Sitemap 
-            <Route path="/themes" element={<ThemesPage />} />
             <Route path ="tools" element={<ToolsPage/>} />
             <Route path="/sitemap" element={<SitemapPage />} />
 
