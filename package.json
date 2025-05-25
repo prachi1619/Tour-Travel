@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@types/react-datepicker": "^6.2.0",

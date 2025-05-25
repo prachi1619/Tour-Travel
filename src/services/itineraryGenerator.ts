@@ -26,7 +26,8 @@ interface Itinerary {
 }
 
 // const OPENROUTER_API_KEY = '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';
-const OPENROUTER_API_KEY = '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';
+// const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_KEY = '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';
 
 export async function testApiConnection(): Promise<boolean> {
   try {
@@ -67,42 +68,44 @@ export async function testApiConnection(): Promise<boolean> {
 
 export async function generateItinerary(options: ItineraryOptions): Promise<Itinerary> {
   try {
-    const prompt = `Generate a detailed ${options.duration}-day travel itinerary for ${options.destination}.
+    const prompt = `Generate a detailed ${options.duration}-day travel itinerary for ${options.destination}, India.
 Travel style: ${options.travelStyle}
 Budget level: ${options.budget}
 Interests: ${options.interests.join(', ')}
 
-Please provide the itinerary in the following format:
+Please provide the itinerary in the following format, using Indian Rupees (₹) for all costs:
 
 Trip Summary:
-[A brief overview of the trip]
+[A brief 2-3 sentence overview of the trip]
 
 Daily Schedule:
 Day 1:
 9:00 AM - [Activity description] (Location)
 11:00 AM - [Activity description] (Location)
-[Continue with more activities...]
+[Add 4-6 activities per day with reasonable time gaps]
 
-Day 2:
-[Similar format to Day 1]
-
-[Continue for all days...]
+[Continue for remaining days...]
 
 Travel Tips:
 • [Tip 1]
 • [Tip 2]
 • [Tip 3]
-[Add more tips...]
+[3-5 specific tips for this destination]
 
-Budget Estimate:
-• Accommodation: [Cost]
-• Meals: [Cost]
-• Activities: [Cost]
-• Transportation: [Cost]
-• Miscellaneous: [Cost]
-Total Estimated Cost: [Total]
+Budget Estimate (in Indian Rupees ₹):
+• Hotel/Accommodation: ₹[X,XXX] per night
+• Daily Meals: ₹[X,XXX] per day
+• Activities & Entrance Fees: ₹[X,XXX]
+• Local Transportation: ₹[X,XXX]
+• Shopping & Miscellaneous: ₹[X,XXX]
+Total Estimated Cost: ₹[XX,XXX]
 
-Please ensure each day's activities include specific times and locations. Format times in 12-hour format (e.g., 9:00 AM, 2:30 PM).`;
+Important:
+1. Use 12-hour time format (e.g., 9:00 AM, 2:30 PM)
+2. Include specific locations for each activity
+3. Start day numbering from 1
+4. Keep activities and times realistic
+5. All prices must be in Indian Rupees (₹)`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -117,7 +120,7 @@ Please ensure each day's activities include specific times and locations. Format
         messages: [
           {
             role: 'system',
-            content: 'You are an expert travel planner. Always provide detailed itineraries with specific times, locations, and activities. Use clear formatting with proper sections for Trip Summary, Daily Schedule, Travel Tips, and Budget Estimate. Include realistic time estimates for activities and travel between locations.'
+            content: 'You are an expert Indian travel planner. Provide detailed itineraries with specific times, locations, and activities for destinations in India. Use clear formatting and include prices in Indian Rupees (₹). Focus on local experiences, authentic Indian cuisine, and cultural attractions. Include practical tips specific to Indian travel conditions.'
           },
           {
             role: 'user',
@@ -150,7 +153,6 @@ Please ensure each day's activities include specific times and locations. Format
 
 function parseItineraryResponse(content: string, options: ItineraryOptions): Itinerary {
   try {
-    // Initialize the itinerary object
     const itinerary: Itinerary = {
       destination: options.destination,
       duration: options.duration,
@@ -172,12 +174,11 @@ function parseItineraryResponse(content: string, options: ItineraryOptions): Iti
       }
       
       // Parse Daily Schedule
-      else if (/^day \d+/i.test(sectionText)) {
-        const dayMatch = sectionText.match(/^day (\d+)/i);
+      else if (/^day\s+\d+/i.test(sectionText)) {
+        const dayMatch = sectionText.match(/^day\s+(\d+)/i);
         if (dayMatch) {
           const dayNumber = parseInt(dayMatch[1]);
           const activities = parseActivities(sectionText);
-          
           if (activities.length > 0) {
             itinerary.dailyPlans.push({
               day: dayNumber,
@@ -193,17 +194,43 @@ function parseItineraryResponse(content: string, options: ItineraryOptions): Iti
           .replace(/^travel tips:?\s*/i, '')
           .split('\n')
           .filter(line => line.trim())
-          .map(tip => tip.replace(/^[•\-*]\s*/, '').trim());
+          .map(tip => tip.replace(/^[•\-*]\s*/, '').trim())
+          .filter(tip => tip.length > 0);
       }
       
       // Parse Budget
       else if (sectionText.toLowerCase().includes('budget')) {
-        itinerary.estimatedBudget = formatBudget(sectionText);
+        // Ensure all amounts have ₹ symbol and proper formatting
+        const budgetLines = sectionText
+          .split('\n')
+          .map(line => {
+            if (line.includes(':')) {
+              const [category, amount] = line.split(':').map(s => s.trim());
+              // Add ₹ symbol if not present and format number
+              const formattedAmount = amount.includes('₹') ? 
+                amount : 
+                `₹${amount.replace(/[^\d,]/g, '')}`;
+              return `${category}: ${formattedAmount}`;
+            }
+            return line;
+          });
+        itinerary.estimatedBudget = budgetLines.join('\n');
       }
     });
 
     // Sort daily plans by day number
     itinerary.dailyPlans.sort((a, b) => a.day - b.day);
+    
+    // Remove any Day 0 entries and renumber days sequentially from 1
+    itinerary.dailyPlans = itinerary.dailyPlans
+      .filter(plan => plan.day > 0)
+      .map((plan, index) => ({
+        ...plan,
+        day: index + 1
+      }));
+
+    // Ensure we only have the requested number of days
+    itinerary.dailyPlans = itinerary.dailyPlans.slice(0, options.duration);
 
     return itinerary;
   } catch (error) {
@@ -287,7 +314,17 @@ function formatBudget(budgetText: string): string {
   // Split into lines and filter out empty ones
   const lines = budget.split('\n')
     .map(line => line.trim())
-    .filter(line => line && !line.toLowerCase().startsWith('budget'));
+    .filter(line => line && !line.toLowerCase().startsWith('budget estimate'))
+    .map(line => {
+      // Ensure ₹ symbol is present and properly formatted
+      if (line.includes(':')) {
+        const [category, amount] = line.split(':');
+        if (amount && !amount.includes('₹')) {
+          return `${category}: ₹${amount.trim()}`;
+        }
+      }
+      return line;
+    });
   
   // Join with proper formatting
   return lines.join('\n');

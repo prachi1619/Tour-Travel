@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaComments, FaRoute, FaCalculator, FaList, FaBalanceScale, FaRuler, FaFileDownload, FaMapMarkedAlt } from 'react-icons/fa';
 import Chatbot from '../components/tools/Chatbot';
 import ItineraryGenerator from '../components/tools/ItineraryGenerator';
 import TripCalculator from '../components/tools/TripCalculator';
 import PackingChecklist from '../components/tools/PackingChecklist';
 import DestinationComparison from '../components/tools/DestinationComparison';
-import DistanceCalculator from '../components/tools/DistanceCalculator';
+import DistanceCalculator from './DistanceCalculator';
 import OfflineDownloads from '../components/tools/OfflineDownloads';
 import ExploreNearby from '../components/explore/ExploreNearby';
+import Layout from '../components/layout/Layout';
 
 const ToolsPage = () => {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
@@ -72,6 +73,7 @@ const ToolsPage = () => {
   ];
 
   const renderToolContent = (toolId: string) => {
+    console.log(toolId);
     switch (toolId) {
       case 'chat':
         return <Chatbot />;
@@ -95,8 +97,9 @@ const ToolsPage = () => {
   };
 
   return (
+    <Layout>
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Travel Tools</h1>
+      <h1 className="text-4xl font-bold text-center mb-12">Explore Tools</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {tools.map((tool) => (
@@ -131,6 +134,7 @@ const ToolsPage = () => {
         {selectedTool && renderToolContent(selectedTool)}
       </div>
     </div>
+    </Layout>
   );
 };
 
