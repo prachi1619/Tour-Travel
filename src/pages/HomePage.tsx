@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,13 +8,57 @@ import FeaturedDestinations from '../components/destinations/FeaturedDestination
 import {
   FaHiking, FaPrayingHands, FaUmbrellaBeach,
   FaLandmark, FaHeart, FaPlane, FaHotel,
-  FaCar, FaTrain, FaUserShield
+  FaCar, FaTrain, FaUserShield, FaSearch, FaArrowRight
 } from 'react-icons/fa';
+
+
+
+function useDarkMode() {
+  const getInitialMode = () =>
+    localStorage.getItem('darkMode') === 'true' ||
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  const [isDarkMode, setIsDarkMode] = useState(getInitialMode);
+
+  useEffect(() => {
+    // Listener for manual storage change (e.g. other tabs)
+    const handleStorageChange = () => {
+      setIsDarkMode(getInitialMode());
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Optional: polling as fallback (if you're not controlling the setter)
+    const interval = setInterval(() => {
+      const current = getInitialMode();
+      setIsDarkMode(prev => {
+        if (prev !== current) return current;
+        return prev;
+      });
+    }, 500); // adjust as needed
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  return isDarkMode;
+}
+
 
 const HomePage = () => {
   const { currentUser, isAdmin } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [activeIndex, setActiveIndex] = useState(0);
+const isDarkMode = useDarkMode();
+
+useEffect(() => {
+  console.log('Dark mode is now:', isDarkMode);
+}, [isDarkMode]);
+
+  console.log('isDarkMode:', isDarkMode);
 
   const heroImages = ['abc'];
 
@@ -28,53 +73,76 @@ const HomePage = () => {
     {
       name: 'Adventure',
       icon: <FaHiking className="w-8 h-8" />,
-      color: 'from-orange-500 to-orange-600',
+      color: 'from-primary-500 to-primary-600',
       description: 'Thrilling experiences in the mountains and wilderness',
-      image: ''
-
+      bgImage: '/images/categories/adventure.jpg'
     },
     {
       name: 'Spiritual',
       icon: <FaPrayingHands className="w-8 h-8" />,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-secondary-500 to-secondary-600',
       description: 'Sacred temples and spiritual journeys',
-      // image: ''
+      bgImage: '/images/categories/spiritual.jpg'
     },
     {
       name: 'Nature',
       icon: <FaUmbrellaBeach className="w-8 h-8" />,
-      color: 'from-green-500 to-green-600',
+      color: 'from-accent-500 to-accent-600',
       description: 'Beautiful landscapes and natural wonders',
-      // image: ''
+      bgImage: '/images/categories/nature.jpg'
     },
     {
       name: 'Historical',
       icon: <FaLandmark className="w-8 h-8" />,
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-secondary-400 to-secondary-500',
       description: 'Ancient monuments and rich heritage',
-      // image: ''
-
+      bgImage: '/images/categories/historical.jpg'
     },
     {
       name: 'Romantic',
       icon: <FaHeart className="w-8 h-8" />,
-      color: 'from-red-500 to-red-600',
+      color: 'from-primary-400 to-primary-500',
       description: 'Perfect destinations for couples',
-      // image: ''
+      bgImage: '/images/categories/romantic.jpg'
     },
   ];
 
   const services = [
-    { name: 'Flights', icon: <FaPlane className="w-8 h-8" />, color: 'text-blue-600' },
-    { name: 'Hotels', icon: <FaHotel className="w-8 h-8" />, color: 'text-green-600' },
-    { name: 'Cars', icon: <FaCar className="w-8 h-8" />, color: 'text-red-600' },
-    { name: 'Trains', icon: <FaTrain className="w-8 h-8" />, color: 'text-orange-600' },
+    { 
+      name: 'Flights', 
+      icon: <FaPlane className="w-8 h-8" />, 
+      color: 'text-secondary-500',
+      bgColor: 'bg-secondary-50',
+      hoverColor: 'hover:bg-secondary-100'
+    },
+    { 
+      name: 'Hotels', 
+      icon: <FaHotel className="w-8 h-8" />, 
+      color: 'text-accent-500',
+      bgColor: 'bg-accent-50',
+      hoverColor: 'hover:bg-accent-100'
+    },
+    { 
+      name: 'Cars', 
+      icon: <FaCar className="w-8 h-8" />, 
+      color: 'text-primary-500',
+      bgColor: 'bg-primary-50',
+      hoverColor: 'hover:bg-primary-100'
+    },
+    { 
+      name: 'Trains', 
+      icon: <FaTrain className="w-8 h-8" />, 
+      color: 'text-secondary-600',
+      bgColor: 'bg-secondary-50',
+      hoverColor: 'hover:bg-secondary-100'
+    },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement search functionality
-    console.log('Searching for:', searchQuery);
+    if (searchQuery.trim()) {
+      navigate(`/destinations?search=${encodeURIComponent(searchQuery)}`);
+    }
   };
 
   return (
@@ -84,7 +152,7 @@ const HomePage = () => {
         <motion.div
           initial={{ y: -100 }}
           animate={{ y: 0 }}
-          className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-2"
+          className="bg-secondary-500 text-white py-2"
         >
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between">
@@ -97,7 +165,7 @@ const HomePage = () => {
                   <Link
                     key={item}
                     to={`/admin/${item.toLowerCase()}`}
-                    className="text-sm hover:text-blue-400 transition-colors hover:scale-105 transform"
+                    className="text-sm hover:text-primary-200 transition-colors hover:scale-105 transform"
                   >
                     Manage {item}
                   </Link>
@@ -108,104 +176,159 @@ const HomePage = () => {
         </motion.div>
       )}
 
-      {/* Hero Section with Carousel */}
-      <section className="relative h-[80vh] overflow-hidden">
-        {heroImages.map((image, index) => (
-          <motion.div
-            key={index}
-            className="absolute inset-0 bg-cover bg-center"
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: index === activeIndex ? 1 : 0,
-              scale: index === activeIndex ? 1.1 : 1
-            }}
-            transition={{ duration: 1 }}
-            style={{ backgroundImage: `url(${image})` }}
-          />
-        ))}
-        <div className="absolute inset-0 bg-black opacity-40"></div>
-        <motion.div
-          className="relative z-10 h-full flex flex-col items-center justify-center text-white"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-center">
-            Discover Incredible India
-          </h1>
-          <p className="text-xl md:text-2xl mb-12 text-center max-w-2xl">
-            Experience the magic of diverse cultures, ancient traditions, and breathtaking landscapes
-          </p>
-          <div className="max-w-4xl w-full mx-auto bg-white/10 backdrop-blur-md rounded-lg p-6">
-            <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Where do you want to go?"
-                className="flex-1 p-4 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/70 backdrop-blur-md"
-              />
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all"
-              >
-                Explore Now
-              </motion.button>
-            </form>
-          </div>
-        </motion.div>
-      </section>
+{/* Need to set the theme color based on light and dark mode */}
 
-      {/* User Welcome Section */}
-      {currentUser && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="py-8 bg-gradient-to-r from-blue-50 to-indigo-50"
-        >
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Welcome back, {currentUser.displayName || 'Traveler'}!
-                </h2>
-                <p className="text-gray-600">Continue your journey of discovery</p>
+
+      <div className="relative bg-surface-light dark:dark:bg-navy-900">
+        {/* Hero Section */}
+        <div className={`relative min-h-screen ${isDarkMode ? 'bg-navy-900' : 'dark:bg-navy-900'}`}>
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(/images/india-hero.jpg)',
+              filter: 'brightness(0.4)'
+            }}
+          /> 
+
+          <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center justify-center py-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center mb-8"
+            >
+              <h1 className="font-brand text-6xl md:text-8xl font-bold text-primary-500 dark:text-primary-400 mb-2">
+                TraviBharat
+              </h1>
+              <p className={`font-body text-xl md:text-2xl text-center italic ${isDarkMode ? 'text-white/90' : 'dark:text-white/80'}`}>
+                The Journey You Deserve. The Bharat You'll Love.
+              </p>
+            </motion.div>
+
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            className={`font-heading text-4xl md:text-5xl font-bold  text-center mb-6 leading-tight ${isDarkMode ? 'text-white' : 'dark:text-primary-100'}`}
+            >
+              Discover the Heart of Bharat
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              // className="font-body text-xl md:text-2xl text-white/90 dark:text-white/80 text-center mb-12 max-w-3xl"
+              className={`font-body text-lg md:text-xl text-center mb-8 max-w-3xl ${isDarkMode ? 'text-white/90' : 'dark:text-white/80'}`}
+            >
+              Experience the magic of diverse cultures, ancient traditions, and breathtaking landscapes
+            </motion.p>
+
+            <motion.form 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              onSubmit={handleSearch} 
+              className="w-full max-w-2xl"
+            >
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Where in Bharat do you want to explore?"
+                  className="w-full px-6 py-4 text-lg rounded-full shadow-xl focus:ring-2 focus:ring-primary-500 focus:outline-none font-body text-text-primary dark:text-white placeholder-text-secondary dark:placeholder-white/60 bg-white/95 dark:bg-navy-900"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-primary-500 dark:bg-primary-600 text-white rounded-full hover:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 flex items-center font-body transition-all"
+                >
+                  <FaSearch className="mr-2" />
+                  Explore Now
+                </button>
               </div>
-              <div className="flex gap-4">
-                <motion.div whileHover={{ scale: 1.05 }}>
-                  <Link
-                    to="/profile"
-                    className="px-6 py-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-all text-blue-600 font-medium"
-                  >
-                    View Profile
-                  </Link>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }}>
-                  <Link
-                    to="/bookings"
-                    className="px-6 py-3 bg-blue-600 rounded-lg shadow-md hover:shadow-lg transition-all text-white font-medium"
-                  >
-                    My Bookings
-                  </Link>
-                </motion.div>
-              </div>
-            </div>
+            </motion.form>
+
+            {/* Indian Flag Colors Bar */}
+            {/* <motion.div 
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="absolute bottom-0 left-0 right-0 flex h-2"
+            >
+              <div className="flex-1 bg-primary-500"></div>
+              <div className="flex-1 bg-white"></div>
+              <div className="flex-1 bg-secondary-500"></div>
+            </motion.div> */}
           </div>
-        </motion.section>
-      )}
+        </div>
+
+        {/* Brief About Section */}
+        <section className="py-16 bg-white dark:bg-navy-900">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="max-w-4xl mx-auto text-center"
+            >
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-navy-500 dark:text-primary-200 mb-6">
+                Welcome to TraviBharat
+              </h2>
+              <p className="font-body text-lg text-text-secondary dark:text-white/70 mb-8">
+                Your gateway to experiencing the vibrant soul of Bharat. We curate authentic travel experiences 
+                that connect you with our rich heritage, diverse cultures, and breathtaking landscapes. From ancient 
+                temples to modern cities, from Himalayan peaks to coastal paradises, let us guide you through the 
+                incredible journey of discovering Bharat.
+              </p>
+              <Link
+                to="/about"
+                className="inline-flex items-center px-6 py-3 text-lg font-medium rounded-full text-white bg-primary-500 dark:bg-primary-600 hover:bg-primary-600 dark:hover:bg-primary-700 transition-colors"
+              >
+                Learn More About Us
+                <FaArrowRight className="ml-2" />
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Featured Destinations */}
+        <section className={`py-20 ${isDarkMode ? 'dark:bg-navy-900' : 'bg-surface-light'}`}>
+          <div className="container mx-auto px-4">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="font-heading text-4xl font-bold text-navy-500 dark:text-primary-200 mb-4">
+                Featured Destinations
+              </h2>
+              <p className="font-body text-lg text-text-secondary dark:text-white/70 max-w-2xl mx-auto">
+                Explore our handpicked selection of Bharat's most captivating destinations
+              </p>
+            </motion.div>
+            <FeaturedDestinations />
+          </div>
+        </section>
+      </div>
 
       {/* Updated Categories Section */}
-      <section className="py-16 bg-gray-50">
+      <section className={`py-20 ${isDarkMode ? 'dark:bg-navy-900' : 'bg-surface-light'}`}>
         <div className="container mx-auto px-4">
-          <motion.h2
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl font-bold mb-12 text-center"
+            className="text-center mb-12"
           >
-            Explore by Category
-          </motion.h2>
+            <h2 className="font-heading text-4xl font-bold text-navy-500 dark:text-primary-200 mb-4">
+              Explore Incredible Bharat
+            </h2>
+            <p className="font-body text-lg text-text-secondary dark:text-white/70 max-w-2xl mx-auto">
+              Discover the perfect way to experience our rich heritage and natural beauty
+            </p>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {categories.map((category, index) => (
               <motion.div
@@ -220,26 +343,20 @@ const HomePage = () => {
                   to={`/category/${category.name.toLowerCase()}`}
                   className="block group h-full"
                 >
-                  <div className="relative h-full overflow-hidden rounded-xl shadow-lg bg-white">
-                    <div className="aspect-w-16 aspect-h-12 overflow-hidden">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.onerror = null;
-                          target.src = `https://via.placeholder.com/800x600/718096/FFFFFF?text=${category.name}`;
-                        }}
+                  <div className="relative h-full overflow-hidden rounded-2xl shadow-lg dark:shadow-xl">
+                    <div className="aspect-w-3 aspect-h-4 bg-gray-200 dark:bg-navy-800">
+                      <div
+                        className="w-full h-full bg-cover bg-center transform group-hover:scale-110 transition-transform duration-700"
+                        style={{ backgroundImage: `url(${category.bgImage})` }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70"></div>
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80" />
                     </div>
-                    <div className="absolute bottom-0 inset-x-0 p-6 text-white">
-                      <div className={`inline-flex items-center justify-center p-3 rounded-full bg-gradient-to-r ${category.color} mb-3`}>
+                    <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                      <div className={`inline-flex items-center justify-center p-3 rounded-full bg-gradient-to-r ${category.color} shadow-lg mb-4`}>
                         {category.icon}
                       </div>
-                      <h3 className="text-xl font-bold mb-2">{category.name}</h3>
-                      <p className="text-sm text-white/90">{category.description}</p>
+                      <h3 className="text-2xl font-heading font-bold mb-2">{category.name}</h3>
+                      <p className="text-sm text-white/90 line-clamp-2">{category.description}</p>
                     </div>
                   </div>
                 </Link>
@@ -249,32 +366,24 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Featured Destinations */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold mb-12 text-center"
-          >
-            Featured Destinations
-          </motion.h2>
-          <FeaturedDestinations />
-        </div>
-      </section>
-
       {/* Services Section */}
-      <section className="py-16">
+
+      <section className={`py-20 ${isDarkMode ? 'dark:bg-navy-900' : 'bg-surface-light'}`}>
         <div className="container mx-auto px-4">
-          <motion.h2
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl font-bold mb-12 text-center"
+            className="text-center mb-12"
           >
-            Plan Your Perfect Trip
-          </motion.h2>
+            <h2 className="font-heading text-4xl font-bold text-navy-500 dark:text-primary-200 mb-4">
+              Travel Services
+            </h2>
+            <p className="font-body text-lg text-text-secondary dark:text-white/70 max-w-2xl mx-auto">
+              Everything you need for a seamless travel experience across Bharat
+            </p>
+          </motion.div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {services.map((service, index) => (
               <motion.div
@@ -287,42 +396,16 @@ const HomePage = () => {
               >
                 <Link
                   to={`/services/${service.name.toLowerCase()}`}
-                  className="flex flex-col items-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all"
+                  className={`flex flex-col items-center p-8 rounded-2xl ${service.bgColor} ${service.hoverColor} transition-all duration-300`}
                 >
-                  <div className={`${service.color} mb-4`}>
+                  <div className={`${service.color} mb-4 transform transition-transform group-hover:scale-110`}>
                     {service.icon}
                   </div>
-                  <span className="text-lg font-medium">{service.name}</span>
+                  <span className={`text-lg font-medium ${isDarkMode ? 'text-text-primary' : 'text-text-primary'}`}>{service.name}</span>
                 </Link>
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl font-bold mb-6">Ready to Start Your Journey?</h2>
-            <p className="text-xl mb-12 max-w-2xl mx-auto">
-              {currentUser
-                ? 'Discover amazing deals on your next adventure'
-                : 'Join us and get personalized travel recommendations'}
-            </p>
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Link
-                to={currentUser ? '/destinations' : '/signup'}
-                className="inline-block bg-white text-blue-600 px-10 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-colors"
-              >
-                {currentUser ? 'Explore Destinations' : 'Start Your Journey'}
-              </Link>
-            </motion.div>
-          </motion.div>
         </div>
       </section>
     </Layout>

@@ -12,6 +12,7 @@ import { followUser, unfollowUser, getUserStats, updateProfilePhoto, getUserRevi
 import ProfileEdit from '../components/profile/ProfileEdit';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ConnectedProfiles from '../components/profile/ConnectedProfiles';
 
 const ProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -43,9 +44,20 @@ console.log('i am here')
         // debugger;
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          
+          // Get user stats
+          const stats = await getUserStats(targetUserId);
+          
+          // Set profile with stats
           setProfile({
             id: userDoc.id,
             ...userData,
+            stats: stats || userData.stats || {
+              reviews: 0,
+              photos: 0,
+              answers: 0,
+              threads: 0
+            },
             joinedDate: formatDate(userData.createdAt || userData.joinedDate)
           } as IUserProfile);
 
@@ -106,31 +118,91 @@ console.log('i am here')
     const file = e.target.files?.[0];
     if (!file || !currentUser) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > MAX_SIZE) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
     try {
       setUploading(true);
       setError('');
 
-      // Create a reference to the storage location
-      const storageRef = ref(storage, `profile-photos/${currentUser.uid}/${Date.now()}_${file.name}`);
+      // Create a clean filename with timestamp
+      const timestamp = Date.now();
+      const fileExtension = file.name.split('.').pop();
+      const cleanFileName = `${timestamp}.${fileExtension}`;
       
-      // Upload the file
-      await uploadBytes(storageRef, file);
+      // Create storage reference
+      const storageRef = ref(storage, `profile-photos/${currentUser.uid}/${cleanFileName}`);
       
-      // Get the download URL
+      // Create file metadata
+      const metadata = {
+        contentType: file.type,
+        customMetadata: {
+          'userId': currentUser.uid,
+          'uploadedAt': new Date().toISOString()
+        }
+      };
+
+      // Upload file
+      await uploadBytes(storageRef, file, metadata);
+      
+      // Get download URL
       const photoURL = await getDownloadURL(storageRef);
 
-      // Update profile photo in Firestore and award points
+      // Update profile photo in Firestore
       await updateProfilePhoto(currentUser.uid, photoURL);
 
       // Update local state
-      setProfile(prev => prev ? { ...prev, photoURL } : null);
+      setProfile(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          photoURL,
+          stats: {
+            ...prev.stats,
+            photos: (prev.stats?.photos || 0) + 1
+          }
+        };
+      });
       
+      // Update current user state
+      if (updateUserProfile) {
+        await updateUserProfile({ photoURL });
+      }
+
       toast.success('Profile photo updated successfully!');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error uploading image:', err);
-      toast.error('Failed to upload image. Please try again.');
+      let errorMessage = 'Failed to upload image. Please try again.';
+      
+      if (err.code === 'storage/unauthorized') {
+        errorMessage = 'Permission denied. Please log in again.';
+      } else if (err.code === 'storage/canceled') {
+        errorMessage = 'Upload was cancelled. Please try again.';
+      } else if (err.code === 'storage/unknown') {
+        errorMessage = 'An unknown error occurred. Please try again.';
+      } else if (err.code === 'storage/quota-exceeded') {
+        errorMessage = 'Storage quota exceeded. Please try a smaller image.';
+      } else if (err.message?.includes('connection refused')) {
+        errorMessage = 'Connection error. Please check your internet connection and try again.';
+      }
+      
+      toast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -255,29 +327,6 @@ console.log(profile,'profile')
                         )}
                       </button>
                     )}
-                  </div>
-                  <div className="flex items-center gap-6 mt-4">
-                    <div className="flex items-center gap-1">
-                      <FaUserFriends className="text-gray-500" />
-                      <div>
-                        <span className="font-semibold">{profile?.followers?.length || 0}</span>
-                        <span className="text-gray-600 ml-1">followers</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <FaUserFriends className="text-gray-500" />
-                      <div>
-                        <span className="font-semibold">{profile?.following?.length || 0}</span>
-                        <span className="text-gray-600 ml-1">following</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <FaTrophy className="text-gray-500" />
-                      <div>
-                        <span className="font-semibold">{profile.points || 0}</span>
-                        <span className="text-gray-600 ml-1">points</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -422,6 +471,29 @@ console.log(profile,'profile')
               )}
             </div>
 
+            {/* After the Badges section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+              <h2 className="text-2xl font-bold mb-4 dark:text-white">Connections</h2>
+              <div className="flex items-center gap-6 mb-6">
+                <div className="flex items-center gap-1">
+                  <FaUserFriends className="text-gray-500" />
+                  <div>
+                    <span className="font-semibold">{profile?.followers?.length || 0}</span>
+                    <span className="text-gray-600 ml-1">followers</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <FaUserFriends className="text-gray-500" />
+                  <div>
+                    <span className="font-semibold">{profile?.following?.length || 0}</span>
+                    <span className="text-gray-600 ml-1">following</span>
+                  </div>
+                </div>
+              </div>
+              
+              <ConnectedProfiles userId={profile.id} />
+            </div>
+
             {/* Contributions */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
               <h2 className="text-2xl font-bold mb-4">Contributions</h2>
@@ -452,24 +524,48 @@ console.log(profile,'profile')
                 </div>
               </div>
 
-              {/* Recent Activity */}
+              {/* Recent Activity and Reviews */}
               <div className="space-y-6">
                 {reviews.length > 0 || threads.length > 0 ? (
                   <>
-                    {reviews.slice(0, 3).map(review => (
-                      <div key={review.id} className="border-b pb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <FaStar className="text-yellow-400" />
-                          <span>Reviewed a destination</span>
-                          <span className="text-gray-600">
-                            • {new Date(review.createdAt).toLocaleDateString()}
-                          </span>
+                    <div className="space-y-6">
+                      {reviews.map(review => (
+                        <div key={review.id} className="border-b dark:border-gray-700 pb-6">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, index) => (
+                                <FaStar
+                                  key={index}
+                                  className={index < review.rating ? 'text-yellow-400' : 'text-gray-300'}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-gray-600">
+                              • {formatDate(review.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 dark:text-gray-300">{review.content}</p>
+                          {review.photos && review.photos.length > 0 && (
+                            <div className="mt-3 flex gap-2 overflow-x-auto">
+                              {review.photos.map((photo, index) => (
+                                <img
+                                  key={index}
+                                  src={photo}
+                                  alt={`Review photo ${index + 1}`}
+                                  className="h-20 w-20 object-cover rounded"
+                                />
+                              ))}
+                            </div>
+                          )}
+                          <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
+                            <span>{review.likes} likes</span>
+                            <span>{review.helpfulCount} found this helpful</span>
+                          </div>
                         </div>
-                        <p className="text-gray-700">{review.content}</p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
 
-                    {threads.slice(0, 3).map(thread => (
+                    {threads.map(thread => (
                       <div key={thread.id} className="border-b pb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <FaComment className="text-blue-600" />
@@ -491,49 +587,6 @@ console.log(profile,'profile')
                 )}
               </div>
             </div>
-
-            {/* Reviews Section */}
-            {reviews.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-                <h2 className="text-2xl font-bold mb-4 dark:text-white">Reviews</h2>
-                <div className="space-y-6">
-                  {reviews.map(review => (
-                    <div key={review.id} className="border-b dark:border-gray-700 pb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, index) => (
-                            <FaStar
-                              key={index}
-                              className={index < review.rating ? 'text-yellow-400' : 'text-gray-300'}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-gray-600">
-                          • {formatDate(review.createdAt)}
-                        </span>
-                      </div>
-                      <p className="text-gray-700">{review.content}</p>
-                      {review.photos && review.photos.length > 0 && (
-                        <div className="mt-3 flex gap-2 overflow-x-auto">
-                          {review.photos.map((photo, index) => (
-                            <img
-                              key={index}
-                              src={photo}
-                              alt={`Review photo ${index + 1}`}
-                              className="h-20 w-20 object-cover rounded"
-                            />
-                          ))}
-                        </div>
-                      )}
-                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
-                        <span>{review.likes} likes</span>
-                        <span>{review.helpfulCount} found this helpful</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}

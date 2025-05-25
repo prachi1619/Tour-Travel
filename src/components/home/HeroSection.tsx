@@ -3,7 +3,7 @@ import { Search, ChevronRight } from 'lucide-react';
 
 export default function HeroSection() {
   return (
-    <section className="relative h-[600px] sm:h-[700px] flex items-center">
+    <section className="relative h-[600px] sm:h-[700px] flex items-center bg-white dark:bg-navy-900">
       {/* Background image with overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center z-0"
@@ -15,27 +15,27 @@ export default function HeroSection() {
       </div>
       
       {/* Content */}
-      <div className="container mx-auto px-4 relative z-10 text-white">
+      <div className="container mx-auto px-4 relative z-10 text-white dark:text-white">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-4 animate-slide-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-4 animate-slide-up text-white dark:text-white">
             Discover Incredible India
           </h1>
-          <p className="text-xl md:text-2xl mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <p className="text-xl md:text-2xl mb-8 animate-slide-up text-white/90 dark:text-white/80" style={{ animationDelay: '0.2s' }}>
             Explore the vibrant culture, breathtaking landscapes, and ancient heritage of India
           </p>
           
           {/* Search box */}
           <div 
-            className="bg-white rounded-full p-2 flex items-center max-w-2xl mx-auto animate-slide-up" 
+            className="bg-white dark:bg-navy-800 rounded-full p-2 flex items-center max-w-2xl mx-auto animate-slide-up" 
             style={{ animationDelay: '0.4s' }}
           >
             <Search size={20} className="text-gray-400 ml-3 mr-2" />
             <input 
               type="text" 
               placeholder="Search destinations, cities, experiences..." 
-              className="flex-grow py-2 px-3 bg-transparent text-gray-900 focus:outline-none"
+              className="flex-grow py-2 px-3 bg-transparent text-gray-900 dark:text-white focus:outline-none"
             />
-            <button className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-full font-medium transition duration-300">
+            <button className="bg-primary-500 hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700 text-white px-6 py-3 rounded-full font-medium transition duration-300">
               Search
             </button>
           </div>
@@ -45,15 +45,15 @@ export default function HeroSection() {
             className="mt-8 flex flex-wrap justify-center gap-4 animate-slide-up" 
             style={{ animationDelay: '0.6s' }}
           >
-            <a href="#" className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full transition duration-300 backdrop-blur-sm flex items-center">
+            <a href="#" className="bg-white/10 dark:bg-navy-700 hover:bg-white/20 dark:hover:bg-navy-600 px-4 py-2 rounded-full transition duration-300 backdrop-blur-sm flex items-center">
               <span>Popular Destinations</span>
               <ChevronRight size={16} className="ml-1" />
             </a>
-            <a href="#" className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full transition duration-300 backdrop-blur-sm flex items-center">
+            <a href="#" className="bg-white/10 dark:bg-navy-700 hover:bg-white/20 dark:hover:bg-navy-600 px-4 py-2 rounded-full transition duration-300 backdrop-blur-sm flex items-center">
               <span>Travel Guides</span>
               <ChevronRight size={16} className="ml-1" />
             </a>
-            <a href="#" className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full transition duration-300 backdrop-blur-sm flex items-center">
+            <a href="#" className="bg-white/10 dark:bg-navy-700 hover:bg-white/20 dark:hover:bg-navy-600 px-4 py-2 rounded-full transition duration-300 backdrop-blur-sm flex items-center">
               <span>Plan Your Trip</span>
               <ChevronRight size={16} className="ml-1" />
             </a>

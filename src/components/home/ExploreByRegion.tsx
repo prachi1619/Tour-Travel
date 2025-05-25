@@ -51,14 +51,14 @@ const regions: RegionCard[] = [
 
 export default function ExploreByRegion() {
   return (
-    <section className="py-16 bg-gray-50 dark:bg-gray-950">
+    <section className="py-16 bg-white dark:bg-navy-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white mb-4">
-            Explore India by Region
+            Explore by Region
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            India's diverse geography offers unique experiences in each region
+            Discover the unique flavors, landscapes, and cultures of every region in India
           </p>
         </div>
         

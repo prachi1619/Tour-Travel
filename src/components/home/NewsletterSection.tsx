@@ -13,13 +13,13 @@ export default function NewsletterSection() {
   };
   
   return (
-    <section className="py-16 bg-primary-500 text-white">
+    <section className="py-16 bg-primary-500 dark:bg-primary-600 text-white dark:text-white">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
             Stay Updated with India Travel Tips
           </h2>
-          <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/90 dark:text-white/80 mb-8 max-w-2xl mx-auto">
             Subscribe to our newsletter for exclusive travel deals, seasonal guides, and insider tips for your next Indian adventure
           </p>
           

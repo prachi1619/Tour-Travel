@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface ProfileAvatarProps {
   src?: string | null;
-  name: string;
+  name?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
 const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ src, name, size = 'md', className = '' }) => {
+  const [imageError, setImageError] = useState(false);
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -23,14 +25,16 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ src, name, size = 'md', c
     lg: 'w-32 h-32 text-4xl'
   };
 
-  if (!src) {
-    return (
-      <div 
-        className={`${sizeClasses[size]} ${className} rounded-full bg-primary-500 text-white flex items-center justify-center font-semibold`}
-      >
-        {getInitials(name || 'User')}
-      </div>
-    );
+  const renderInitials = () => (
+    <div 
+      className={`${sizeClasses[size]} ${className} rounded-full bg-primary-500 text-white flex items-center justify-center font-semibold`}
+    >
+      {getInitials(name || 'User')}
+    </div>
+  );
+
+  if (!src || imageError) {
+    return renderInitials();
   }
 
   return (
@@ -38,6 +42,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ src, name, size = 'md', c
       src={src}
       alt={name}
       className={`${sizeClasses[size]} ${className} rounded-full object-cover`}
+      onError={() => setImageError(true)}
     />
   );
 };

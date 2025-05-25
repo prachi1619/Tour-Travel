@@ -13,10 +13,13 @@ import {
   getDocs,
   Timestamp,
   writeBatch,
+  runTransaction,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { POINTS, BADGES } from '../utils/pointsSystem';
 import { UserProfile, Badge } from '../types/user';
+import { auth } from '../lib/firebase';
+import { updateProfile } from 'firebase/auth';
 
 export interface UserStats {
   reviews: number;
@@ -146,16 +149,24 @@ export const updateProfilePhoto = async (userId: string, photoURL: string) => {
     // Check if this is their first photo upload
     const isFirstUpload = !userDoc.data().photoURL;
     
+    // Update Firestore document
     await updateDoc(userRef, {
       photoURL,
       points: increment(isFirstUpload ? POINTS.PROFILE_PHOTO_UPLOAD : 0),
-      updatedAt: Timestamp.now().toDate().toISOString()
+      updatedAt: Timestamp.now().toDate().toISOString(),
+      'stats.photos': increment(1) // Increment photo count in stats
     });
+
+    // Update Firebase Auth profile
+    const user = auth.currentUser;
+    if (user) {
+      await updateProfile(user, { photoURL });
+    }
 
     return true;
   } catch (error) {
     console.error('Error updating profile photo:', error);
-    return false;
+    throw error; // Throw error to handle it in the component
   }
 };
 
@@ -241,29 +252,72 @@ export const unfollowUser = async (followerId: string, targetUserId: string) => 
 // Function to add a review with points
 export const addReview = async (userId: string, review: Omit<Review, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
-    const batch = writeBatch(db);
-    const userRef = doc(db, 'users', userId);
-    const reviewRef = doc(collection(db, 'reviews'));
+    const result = await runTransaction(db, async (transaction) => {
+      // Check if user has already reviewed this destination
+      const existingReviewQuery = query(
+        collection(db, 'reviews'),
+        where('userId', '==', userId),
+        where('destinationId', '==', review.destinationId)
+      );
+      const existingReviews = await getDocs(existingReviewQuery);
+      
+      if (!existingReviews.empty) {
+        throw new Error('You have already reviewed this destination');
+      }
 
-    // Update user points and review count
-    batch.update(userRef, {
-      points: increment(POINTS.ADD_REVIEW),
-      'stats.reviews': increment(1)
+      // Get user reference and data
+      const userRef = doc(db, 'users', userId);
+      const userDoc = await transaction.get(userRef);
+      
+      if (!userDoc.exists()) {
+        throw new Error('User not found');
+      }
+
+      // Create new review
+      const reviewRef = doc(collection(db, 'reviews'));
+      const now = Timestamp.now().toDate().toISOString();
+      
+      const newReview = {
+        ...review,
+        id: reviewRef.id,
+        createdAt: now,
+        updatedAt: now
+      };
+
+      // Get current user stats
+      const userData = userDoc.data();
+      const currentStats = userData.stats || {};
+      
+      // Update user stats
+      const updatedStats = {
+        ...currentStats,
+        reviews: (currentStats.reviews || 0) + 1
+      };
+
+      // Set review document
+      transaction.set(reviewRef, newReview);
+
+      // Update user document with new stats and points
+      transaction.update(userRef, {
+        points: increment(POINTS.ADD_REVIEW),
+        stats: updatedStats,
+        updatedAt: now
+      });
+
+      // Update destination review count
+      const destinationRef = doc(db, 'destinations', review.destinationId);
+      transaction.update(destinationRef, {
+        reviewCount: increment(1),
+        updatedAt: now
+      });
+
+      return reviewRef.id;
     });
 
-    // Create review
-    batch.set(reviewRef, {
-      ...review,
-      id: reviewRef.id,
-      createdAt: Timestamp.now().toDate().toISOString(),
-      updatedAt: Timestamp.now().toDate().toISOString()
-    });
-
-    await batch.commit();
-    return reviewRef.id;
+    return result;
   } catch (error) {
     console.error('Error adding review:', error);
-    return null;
+    throw error;
   }
 };
 
@@ -405,7 +459,7 @@ export const updateTravelPreferences = async (userId: string, preferences: any) 
   }
 };
 
-// Function to get user reviews
+// Function to get user reviews with deduplication
 export const getUserReviews = async (userId: string): Promise<Review[]> => {
   try {
     const reviewsQuery = query(
@@ -415,10 +469,22 @@ export const getUserReviews = async (userId: string): Promise<Review[]> => {
     );
 
     const reviewsSnap = await getDocs(reviewsQuery);
-    return reviewsSnap.docs.map(doc => ({
+    const reviews = reviewsSnap.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Review[];
+
+    // Create a map to keep only the latest review per destination
+    const latestReviews = new Map();
+    reviews.forEach(review => {
+      const existingReview = latestReviews.get(review.destinationId);
+      if (!existingReview || new Date(review.createdAt) > new Date(existingReview.createdAt)) {
+        latestReviews.set(review.destinationId, review);
+      }
+    });
+
+    // Convert map values back to array
+    return Array.from(latestReviews.values());
   } catch (error) {
     console.error('Error getting user reviews:', error);
     return [];
@@ -482,4 +548,104 @@ const calculateProfileCompletion = (userData: any): number => {
 
   const completedFields = fields.filter(Boolean).length;
   return Math.round((completedFields / fields.length) * 100);
+};
+
+// Function to get connected profiles (followers/following)
+export const getConnectedProfiles = async (userId: string, type: 'followers' | 'following'): Promise<UserProfile[]> => {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (!userDoc.exists()) return [];
+
+    const userData = userDoc.data();
+    const connectedIds = type === 'followers' ? userData.followers : userData.following;
+
+    if (!connectedIds || connectedIds.length === 0) return [];
+
+    // Get profiles in batches of 10
+    const profiles: UserProfile[] = [];
+    for (let i = 0; i < connectedIds.length; i += 10) {
+      const batch = connectedIds.slice(i, i + 10);
+      const profileDocs = await Promise.all(
+        batch.map(id => getDoc(doc(db, 'users', id)))
+      );
+
+      profiles.push(
+        ...profileDocs
+          .filter(doc => doc.exists())
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            joinedDate: formatDate(doc.data().createdAt || doc.data().joinedDate)
+          })) as UserProfile[]
+      );
+    }
+
+    return profiles;
+  } catch (error) {
+    console.error(`Error getting ${type}:`, error);
+    return [];
+  }
+};
+
+// Function to check if users are mutually following each other
+export const checkMutualConnection = async (userId1: string, userId2: string): Promise<boolean> => {
+  try {
+    const [user1Doc, user2Doc] = await Promise.all([
+      getDoc(doc(db, 'users', userId1)),
+      getDoc(doc(db, 'users', userId2))
+    ]);
+
+    if (!user1Doc.exists() || !user2Doc.exists()) return false;
+
+    const user1Data = user1Doc.data();
+    const user2Data = user2Doc.data();
+
+    return (
+      user1Data.following?.includes(userId2) &&
+      user2Data.following?.includes(userId1)
+    );
+  } catch (error) {
+    console.error('Error checking mutual connection:', error);
+    return false;
+  }
+};
+
+// Function to get mutual connections between two users
+export const getMutualConnections = async (userId1: string, userId2: string): Promise<UserProfile[]> => {
+  try {
+    const [user1Doc, user2Doc] = await Promise.all([
+      getDoc(doc(db, 'users', userId1)),
+      getDoc(doc(db, 'users', userId2))
+    ]);
+
+    if (!user1Doc.exists() || !user2Doc.exists()) return [];
+
+    const user1Data = user1Doc.data();
+    const user2Data = user2Doc.data();
+
+    // Find mutual followers
+    const mutualIds = user1Data.following?.filter(
+      (id: string) => user2Data.following?.includes(id)
+    ) || [];
+
+    if (mutualIds.length === 0) return [];
+
+    // Get profiles of mutual connections
+    const profiles = await Promise.all(
+      mutualIds.map(async (id: string) => {
+        const doc = await getDoc(doc(db, 'users', id));
+        if (!doc.exists()) return null;
+        return {
+          id: doc.id,
+          ...doc.data(),
+          joinedDate: formatDate(doc.data().createdAt || doc.data().joinedDate)
+        } as UserProfile;
+      })
+    );
+
+    return profiles.filter((profile): profile is UserProfile => profile !== null);
+  } catch (error) {
+    console.error('Error getting mutual connections:', error);
+    return [];
+  }
 }; 

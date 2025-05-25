@@ -5,6 +5,8 @@ import { db, storage } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Review } from '../../types/social';
 import { FaStar, FaThumbsUp, FaImage } from 'react-icons/fa';
+import { addReview } from '../../services/userService';
+import { toast } from 'react-toastify';
 
 interface ReviewSectionProps {
   destinationId: string;
@@ -19,10 +21,17 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ destinationId }) => {
   const [photos, setPhotos] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [hasReviewed, setHasReviewed] = useState(false);
 
   useEffect(() => {
     fetchReviews();
   }, [destinationId]);
+
+  useEffect(() => {
+    if (currentUser && reviews.length > 0) {
+      setHasReviewed(reviews.some(review => review.userId === currentUser.uid));
+    }
+  }, [currentUser, reviews]);
 
   const fetchReviews = async () => {
     try {
@@ -36,7 +45,16 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ destinationId }) => {
         id: doc.id,
         ...doc.data()
       })) as Review[];
-      setReviews(fetchedReviews);
+
+      // Deduplicate reviews by userId
+      const uniqueReviews = fetchedReviews.reduce((acc, review) => {
+        if (!acc.some(r => r.userId === review.userId)) {
+          acc.push(review);
+        }
+        return acc;
+      }, [] as Review[]);
+
+      setReviews(uniqueReviews);
     } catch (err) {
       console.error('Error fetching reviews:', err);
       setError('Failed to load reviews');
@@ -52,6 +70,10 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ destinationId }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser || !newReview.trim() || !rating) return;
+    if (hasReviewed) {
+      toast.error('You have already reviewed this destination');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -66,7 +88,8 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ destinationId }) => {
         photoUrls.push(url);
       }
 
-      const review = {
+      // Create review object
+      const reviewData = {
         userId: currentUser.uid,
         userName: currentUser.displayName || 'Anonymous',
         userPhoto: currentUser.photoURL || '',
@@ -75,20 +98,26 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ destinationId }) => {
         content: newReview.trim(),
         photos: photoUrls,
         likes: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        helpfulCount: 0
       };
 
-      await addDoc(collection(db, 'reviews'), review);
+      // Add review using the service function
+      await addReview(currentUser.uid, reviewData);
+      
+      // Refresh reviews
       await fetchReviews();
 
       // Reset form
       setNewReview('');
       setRating(0);
       setPhotos([]);
-    } catch (err) {
+      setHasReviewed(true);
+      
+      toast.success('Review submitted successfully!');
+    } catch (err: any) {
       console.error('Error submitting review:', err);
-      setError('Failed to submit review');
+      toast.error(err.message || 'Failed to submit review');
+      setError(err.message || 'Failed to submit review');
     } finally {
       setLoading(false);
     }
@@ -131,7 +160,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ destinationId }) => {
       </div>
 
       {/* Review Form */}
-      {currentUser && (
+      {currentUser && !hasReviewed ? (
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
           <div className="mb-4">
             <label className="block mb-2">Rating</label>
@@ -204,7 +233,11 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ destinationId }) => {
             {loading ? 'Submitting...' : 'Submit Review'}
           </button>
         </form>
-      )}
+      ) : currentUser && hasReviewed ? (
+        <div className="bg-blue-50 text-blue-700 p-4 rounded-lg">
+          You have already reviewed this destination.
+        </div>
+      ) : null}
 
       {/* Reviews List */}
       <div className="space-y-6">

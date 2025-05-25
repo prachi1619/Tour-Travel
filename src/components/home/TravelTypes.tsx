@@ -51,14 +51,14 @@ const categories: TravelCategory[] = [
 
 export default function TravelTypes() {
   return (
-    <section className="py-16 bg-white dark:bg-gray-900">
+    <section className="py-16 bg-white dark:bg-navy-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white mb-4">
-            Explore by Experience
+            Travel Types
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            Find your perfect Indian adventure based on your interests
+            Find your perfect travel experience in India
           </p>
         </div>
         
