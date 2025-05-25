@@ -9,7 +9,7 @@ interface Message {
   timestamp: Date;
 }
 
-const apiKey = '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';
+const apiKey = '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';
 
 const generateResponse = async (message: string): Promise<string> => {
   const requestBody = {

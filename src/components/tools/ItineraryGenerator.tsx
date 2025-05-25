@@ -1,129 +1,79 @@
-import React, { useState } from 'react';
-import { FaSpinner } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { generateItinerary, testApiConnection } from '../../services/itineraryGenerator';
+import { FaSpinner, FaMapMarkerAlt, FaCalendar, FaDollarSign, FaHiking, FaExclamationTriangle } from 'react-icons/fa';
 
 interface ItineraryFormData {
   destination: string;
   duration: number;
-  travelStyle: 'Relaxed' | 'Moderate' | 'Intensive';
   interests: string[];
+  budget: string;
+  travelStyle: string;
 }
 
-const generateItinerary = (data: ItineraryFormData): string => {
-  const { destination, duration, travelStyle, interests } = data;
-  
-  // This is a template-based itinerary generator
-  let itinerary = `${duration}-Day ${travelStyle} Itinerary for ${destination}\n\n`;
-  
-  const activitiesPerDay = {
-    Relaxed: 2,
-    Moderate: 3,
-    Intensive: 4
-  };
+const interestOptions = [
+  'Culture & History',
+  'Nature & Outdoors',
+  'Food & Cuisine',
+  'Shopping',
+  'Adventure',
+  'Relaxation',
+  'Art & Museums',
+  'Nightlife',
+  'Local Experiences',
+  'Photography'
+];
 
-  const activities = {
-    'Historical Sites': [
-      'Visit ancient temples',
-      'Explore historical monuments',
-      'Tour heritage buildings',
-      'Visit museums',
-      'Walk through old quarters'
-    ],
-    'Nature': [
-      'Nature trail hiking',
-      'Visit national parks',
-      'Bird watching',
-      'Garden tours',
-      'Lake/riverside visits'
-    ],
-    'Food & Culture': [
-      'Local food tasting',
-      'Cooking classes',
-      'Cultural performances',
-      'Market visits',
-      'Street food tours'
-    ],
-    'Adventure': [
-      'Adventure sports',
-      'Trekking',
-      'Water sports',
-      'Rock climbing',
-      'Mountain biking'
-    ]
-  };
+const travelStyles = [
+  'Relaxed',
+  'Moderate',
+  'Fast-paced',
+  'Budget',
+  'Luxury',
+  'Family-friendly',
+  'Solo',
+  'Romantic',
+  'Adventure',
+  'Cultural'
+];
 
-  // Generate day-wise itinerary
-  for (let day = 1; day <= duration; day++) {
-    itinerary += `\nDay ${day}:\n`;
-    const dayActivities = new Set<string>();
+const budgetLevels = [
+  'Budget',
+  'Mid-range',
+  'Luxury',
+  'Ultra-luxury'
+];
 
-    // Add activities based on interests and travel style
-    for (let i = 0; i < activitiesPerDay[travelStyle]; i++) {
-      const selectedInterest = interests[Math.floor(Math.random() * interests.length)];
-      const possibleActivities = activities[selectedInterest as keyof typeof activities];
-      const activity = possibleActivities[Math.floor(Math.random() * possibleActivities.length)];
-      
-      if (!dayActivities.has(activity)) {
-        dayActivities.add(activity);
-        itinerary += `- ${activity}\n`;
-      }
-    }
-
-    // Add meals
-    itinerary += '- Breakfast at hotel\n';
-    if (travelStyle !== 'Relaxed') {
-      itinerary += '- Local lunch\n';
-    }
-    itinerary += '- Dinner at recommended restaurant\n';
-  }
-
-  return itinerary;
-};
-
-const ItineraryGenerator = () => {
+const ItineraryGenerator: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData>({
     destination: '',
-    duration: 1,
-    travelStyle: 'Relaxed',
-    interests: []
+    duration: 3,
+    interests: [],
+    budget: 'Mid-range',
+    travelStyle: 'Moderate'
   });
-  const [loading, setLoading] = useState(false);
-  const [itinerary, setItinerary] = useState('');
-  const [error, setError] = useState('');
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleInterestChange = (interest: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      interests: prev.interests.includes(interest)
-        ? prev.interests.filter((i) => i !== interest)
-        : [...prev.interests, interest]
-    }));
-  };
+  const [itinerary, setItinerary] = useState<any>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.interests.length === 0) {
+      setError('Please select at least one interest');
+      return;
+    }
+
     setLoading(true);
-    setError('');
+    setError(null);
 
     try {
-      if (!formData.destination) {
-        throw new Error('Please enter a destination');
-      }
-      if (formData.interests.length === 0) {
-        throw new Error('Please select at least one interest');
+      // Check API connection before generating itinerary
+      const isConnected = await testApiConnection();
+      if (!isConnected) {
+        throw new Error('Unable to connect to the itinerary service. Please try again.');
       }
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const result = generateItinerary(formData);
+      const result = await generateItinerary(formData);
       setItinerary(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate itinerary');
@@ -132,89 +82,189 @@ const ItineraryGenerator = () => {
     }
   };
 
+  const handleInterestToggle = (interest: string) => {
+    setFormData(prev => ({
+      ...prev,
+      interests: prev.interests.includes(interest)
+        ? prev.interests.filter(i => i !== interest)
+        : [...prev.interests, interest]
+    }));
+  };
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">AI Itinerary Generator</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+    <div className="max-w-6xl mx-auto p-4 space-y-8">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold mb-2">AI Travel Itinerary Generator</h2>
+        <p className="text-gray-600">Create your perfect trip itinerary in seconds</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Form Section */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Destination */}
             <div>
-              <label className="block mb-2">Destination</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <FaMapMarkerAlt className="inline mr-2" />
+                Destination
+              </label>
               <input
                 type="text"
-                name="destination"
                 value={formData.destination}
-                onChange={handleInputChange}
-                placeholder="Where do you want to go?"
-                className="w-full p-2 border rounded"
+                onChange={e => setFormData(prev => ({ ...prev, destination: e.target.value }))}
+                className="w-full p-2 border rounded-lg"
+                placeholder="e.g., Paris, France"
+                required
               />
             </div>
+
+            {/* Duration */}
             <div>
-              <label className="block mb-2">Duration (days)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <FaCalendar className="inline mr-2" />
+                Duration (days)
+              </label>
               <input
                 type="number"
-                name="duration"
-                value={formData.duration}
-                onChange={handleInputChange}
                 min="1"
                 max="30"
-                className="w-full p-2 border rounded"
+                value={formData.duration}
+                onChange={e => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                className="w-full p-2 border rounded-lg"
+                required
               />
             </div>
+
+            {/* Budget */}
             <div>
-              <label className="block mb-2">Travel Style</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <FaDollarSign className="inline mr-2" />
+                Budget Level
+              </label>
               <select
-                name="travelStyle"
-                value={formData.travelStyle}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
+                value={formData.budget}
+                onChange={e => setFormData(prev => ({ ...prev, budget: e.target.value }))}
+                className="w-full p-2 border rounded-lg"
+                required
               >
-                <option>Relaxed</option>
-                <option>Moderate</option>
-                <option>Intensive</option>
+                {budgetLevels.map(level => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
               </select>
             </div>
+
+            {/* Travel Style */}
             <div>
-              <label className="block mb-2">Interests</label>
-              <div className="space-y-2">
-                {['Historical Sites', 'Nature', 'Food & Culture', 'Adventure'].map((interest) => (
-                  <label key={interest} className="flex items-center">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <FaHiking className="inline mr-2" />
+                Travel Style
+              </label>
+              <select
+                value={formData.travelStyle}
+                onChange={e => setFormData(prev => ({ ...prev, travelStyle: e.target.value }))}
+                className="w-full p-2 border rounded-lg"
+                required
+              >
+                {travelStyles.map(style => (
+                  <option key={style} value={style}>{style}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Interests */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Interests (select multiple)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {interestOptions.map(interest => (
+                  <label key={interest} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       checked={formData.interests.includes(interest)}
-                      onChange={() => handleInterestChange(interest)}
-                      className="mr-2"
+                      onChange={() => handleInterestToggle(interest)}
+                      className="rounded text-blue-600"
                     />
-                    {interest}
+                    <span className="text-sm">{interest}</span>
                   </label>
                 ))}
               </div>
             </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 flex items-center justify-center"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
             >
               {loading ? (
-                <>
+                <span className="flex items-center justify-center">
                   <FaSpinner className="animate-spin mr-2" />
                   Generating...
-                </>
+                </span>
               ) : (
                 'Generate Itinerary'
               )}
             </button>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
           </form>
         </div>
-        <div className="bg-gray-50 p-4 rounded">
-          <h3 className="font-bold mb-4">Generated Itinerary</h3>
+
+        {/* Results Section */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+              {error}
+            </div>
+          )}
+
           {itinerary ? (
-            <pre className="whitespace-pre-wrap font-sans">{itinerary}</pre>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-bold mb-2">Trip Summary</h3>
+                <p className="text-gray-600">{itinerary.summary}</p>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold mb-2">Daily Schedule</h3>
+                <div className="space-y-4">
+                  {itinerary.dailyPlans.map((day: any) => (
+                    <div key={day.day} className="border rounded-lg p-4">
+                      <h4 className="font-bold mb-2">Day {day.day}</h4>
+                      <div className="space-y-2">
+                        {day.activities.map((activity: any, index: number) => (
+                          <div key={index} className="flex">
+                            <span className="font-medium w-20">{activity.time}</span>
+                            <div>
+                              <p>{activity.activity}</p>
+                              {activity.location && (
+                                <p className="text-sm text-gray-600">📍 {activity.location}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold mb-2">Travel Tips</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  {itinerary.tips.map((tip: string, index: number) => (
+                    <li key={index} className="text-gray-600">{tip}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold mb-2">Budget Estimate</h3>
+                <p className="text-gray-600">{itinerary.estimatedBudget}</p>
+              </div>
+            </div>
           ) : (
-            <p className="text-gray-600">
-              Your personalized itinerary will appear here after generation.
-            </p>
+            <div className="text-center text-gray-500 py-8">
+              Fill out the form and generate your personalized travel itinerary
+            </div>
           )}
         </div>
       </div>
