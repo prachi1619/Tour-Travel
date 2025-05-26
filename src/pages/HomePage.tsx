@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -10,41 +10,17 @@ import {
   FaLandmark, FaHeart, FaPlane, FaHotel,
   FaCar, FaTrain, FaUserShield, FaSearch, FaArrowRight
 } from 'react-icons/fa';
-
-
+import { useTheme } from '../context/ThemeContext';
+import { Particles } from "react-tsparticles";
+import { Engine } from "tsparticles-engine";
+import { loadSlim } from "tsparticles-slim";
 
 function useDarkMode() {
-  const getInitialMode = () =>
-    localStorage.getItem('darkMode') === 'true' ||
-    window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  const [isDarkMode, setIsDarkMode] = useState(getInitialMode);
-
-  useEffect(() => {
-    // Listener for manual storage change (e.g. other tabs)
-    const handleStorageChange = () => {
-      setIsDarkMode(getInitialMode());
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    // Optional: polling as fallback (if you're not controlling the setter)
-    const interval = setInterval(() => {
-      const current = getInitialMode();
-      setIsDarkMode(prev => {
-        if (prev !== current) return current;
-        return prev;
-      });
-    }, 500); // adjust as needed
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
-
-  return isDarkMode;
+  const { isDark } = useTheme();
+  return isDark;
 }
+
+
 
 
 const HomePage = () => {
@@ -52,13 +28,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [activeIndex, setActiveIndex] = useState(0);
-const isDarkMode = useDarkMode();
-
-useEffect(() => {
-  console.log('Dark mode is now:', isDarkMode);
-}, [isDarkMode]);
-
-  console.log('isDarkMode:', isDarkMode);
+  const isDarkMode = useDarkMode();
 
   const heroImages = ['abc'];
 
@@ -111,30 +81,30 @@ useEffect(() => {
     { 
       name: 'Flights', 
       icon: <FaPlane className="w-8 h-8" />, 
-      color: 'text-secondary-500',
-      bgColor: 'bg-secondary-50',
-      hoverColor: 'hover:bg-secondary-100'
+      color: 'text-secondary-500 dark:text-secondary-400',
+      bgColor: 'bg-secondary-50 dark:bg-secondary-900/20',
+      hoverColor: 'hover:bg-secondary-100 dark:hover:bg-secondary-800/30'
     },
     { 
       name: 'Hotels', 
       icon: <FaHotel className="w-8 h-8" />, 
-      color: 'text-accent-500',
-      bgColor: 'bg-accent-50',
-      hoverColor: 'hover:bg-accent-100'
+      color: 'text-accent-500 dark:text-accent-400',
+      bgColor: 'bg-accent-50 dark:bg-accent-900/20',
+      hoverColor: 'hover:bg-accent-100 dark:hover:bg-accent-800/30'
     },
     { 
       name: 'Cars', 
       icon: <FaCar className="w-8 h-8" />, 
-      color: 'text-primary-500',
-      bgColor: 'bg-primary-50',
-      hoverColor: 'hover:bg-primary-100'
+      color: 'text-primary-500 dark:text-primary-400',
+      bgColor: 'bg-primary-50 dark:bg-primary-900/20',
+      hoverColor: 'hover:bg-primary-100 dark:hover:bg-primary-800/30'
     },
     { 
       name: 'Trains', 
       icon: <FaTrain className="w-8 h-8" />, 
-      color: 'text-secondary-600',
-      bgColor: 'bg-secondary-50',
-      hoverColor: 'hover:bg-secondary-100'
+      color: 'text-secondary-600 dark:text-secondary-300',
+      bgColor: 'bg-secondary-50 dark:bg-secondary-900/20',
+      hoverColor: 'hover:bg-secondary-100 dark:hover:bg-secondary-800/30'
     },
   ];
 
@@ -144,6 +114,10 @@ useEffect(() => {
       navigate(`/destinations?search=${encodeURIComponent(searchQuery)}`);
     }
   };
+
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadSlim(engine);
+  }, []);
 
   return (
     <Layout>
@@ -176,144 +150,246 @@ useEffect(() => {
         </motion.div>
       )}
 
-{/* Need to set the theme color based on light and dark mode */}
+      {/* Hero Section */}
+      <div className="relative min-h-screen overflow-hidden 
+  bg-gradient-to-br from-[#138808] via-[#ffffff] to-[#FF9933]
+  dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] 
+  dark:from-navy-800 dark:via-navy-900 dark:to-navy-950">
+
+        {/* Particles Animation */}
+        <Particles
+          id="tsparticles"
+          init={particlesInit}
+          options={{
+            background: {
+              color: {
+                value: "transparent",
+              },
+            },
+            fpsLimit: 120,
+            particles: {
+              color: {
+                value: ["#FF9933", "#138808", "#000080"],
+              },
+              collisions: {
+                enable: false,
+              },
+              move: {
+                direction: "none",
+                enable: true,
+                outModes: {
+                  default: "bounce",
+                },
+                random: false,
+                speed: 1,
+                straight: false,
+              },
+              number: {
+                density: {
+                  enable: true,
+                  area: 800,
+                },
+                value: 80,
+              },
+              opacity: {
+                value: 0.5,
+              },
+              shape: {
+                type: "circle",
+              },
+              size: {
+                value: { min: 1, max: 5 },
+              },
+            },
+            detectRetina: true,
+          }}
+          className="absolute inset-0 z-0"
+        />
+
+        {/* Decorative Elements - Light Mode */}
+        <div className="absolute inset-0 light:block dark:hidden">
+          <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-bl from-primary-200/40 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-secondary-200/30 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute inset-0 opacity-5 bg-[url('/patterns/indian-pattern-light.png')] bg-repeat"></div>
+        </div>
+
+        {/* Decorative Elements - Dark Mode */}
+        <div className="absolute inset-0 hidden dark:block">
+          <div className="absolute inset-0 bg-[url('/patterns/stars.png')] bg-repeat opacity-20 animate-twinkle"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-navy-900/50 to-navy-900/80"></div>
+          <div className="absolute inset-0 bg-[url('/patterns/indian-pattern-dark.png')] bg-repeat opacity-10"></div>
+        </div>
+
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-fixed
+            opacity-40 dark:opacity-20
+            mix-blend-overlay dark:mix-blend-soft-light"
+          style={{ backgroundImage: 'url(/images/india-hero.jpg)' }}
+        />
+
+        {/* Main Content */}
+        <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center justify-center py-20">
+
+        <motion.h1
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8 }}
+        className="text-6xl md:text-8xl font-extrabold 
+          bg-gradient-to-r 
+          from-[#FF9933] via-[#0000FF] to-[#138808] 
+          dark:from-[#FF9933] dark:via-[#ffffff] dark:to-[#138808]
+          bg-clip-text text-transparent animate-gradient-x 
+          [text-shadow:_2px_2px_4px_rgba(0,0,0,0.05)]">
+        TraviBharat
+      </motion.h1>
 
 
-      <div className="relative bg-surface-light dark:dark:bg-navy-900">
-        {/* Hero Section */}
-        <div className={`relative min-h-screen ${isDarkMode ? 'bg-navy-900' : 'dark:bg-navy-900'}`}>
-          {/* Background Image */}
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: 'url(/images/india-hero.jpg)',
-              filter: 'brightness(0.4)'
-            }}
-          /> 
-
-          <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center justify-center py-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center mb-8"
-            >
-              <h1 className="font-brand text-6xl md:text-8xl font-bold text-primary-500 dark:text-primary-400 mb-2">
-                TraviBharat
-              </h1>
-              <p className={`font-body text-xl md:text-2xl text-center italic ${isDarkMode ? 'text-white/90' : 'dark:text-white/80'}`}>
-                The Journey You Deserve. The Bharat You'll Love.
-              </p>
-            </motion.div>
-
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            className={`font-heading text-4xl md:text-5xl font-bold  text-center mb-6 leading-tight ${isDarkMode ? 'text-white' : 'dark:text-primary-100'}`}
-            >
-              Discover the Heart of Bharat
-            </motion.h2>
-            <motion.p 
+     {/* Subtitle */}
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              // className="font-body text-xl md:text-2xl text-white/90 dark:text-white/80 text-center mb-12 max-w-3xl"
-              className={`font-body text-lg md:text-xl text-center mb-8 max-w-3xl ${isDarkMode ? 'text-white/90' : 'dark:text-white/80'}`}
-            >
-              Experience the magic of diverse cultures, ancient traditions, and breathtaking landscapes
+              className="text-xl md:text-2xl mt-4 mb-6 text-gray-700 dark:text-gray-300 italic">
+              The Journey You Deserve. The Bharat You'll Love.
             </motion.p>
 
-            <motion.form 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              onSubmit={handleSearch} 
-              className="w-full max-w-2xl"
-            >
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Where in Bharat do you want to explore?"
-                  className="w-full px-6 py-4 text-lg rounded-full shadow-xl focus:ring-2 focus:ring-primary-500 focus:outline-none font-body text-text-primary dark:text-white placeholder-text-secondary dark:placeholder-white/60 bg-white/95 dark:bg-navy-900"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-primary-500 dark:bg-primary-600 text-white rounded-full hover:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 flex items-center font-body transition-all"
-                >
-                  <FaSearch className="mr-2" />
-                  Explore Now
-                </button>
-              </div>
-            </motion.form>
 
-            {/* Indian Flag Colors Bar */}
-            {/* <motion.div 
-              initial={{ opacity: 0, scaleX: 0 }}
-              animate={{ opacity: 1, scaleX: 1 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              className="absolute bottom-0 left-0 right-0 flex h-2"
-            >
-              <div className="flex-1 bg-primary-500"></div>
-              <div className="flex-1 bg-white"></div>
-              <div className="flex-1 bg-secondary-500"></div>
-            </motion.div> */}
-          </div>
+      {/* Main Heading */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="text-center mb-12 relative"
+      >
+        <h2 className="font-heading text-4xl md:text-5xl font-bold
+          bg-clip-text text-transparent
+          bg-gradient-to-r from-navy-800 to-navy-600
+          dark:from-white dark:to-gray-300
+          [text-shadow:_1px_1px_2px_rgb(0_0_0_/_10%)] dark:[text-shadow:_2px_2px_4px_rgb(0_0_0_/_40%)]">
+          Discover the Heart of Bharat
+        </h2>
+        <div className="absolute -inset-x-4 -inset-y-2
+          bg-gradient-to-r from-transparent via-white/30 to-transparent dark:via-white/5
+          blur-xl -z-10"></div>
+      </motion.div>
+
+      {/* Subtitle */}
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="font-body text-xl md:text-2xl text-center mb-16 max-w-3xl
+          text-gray-600 dark:text-gray-300
+          drop-shadow-sm dark:drop-shadow-lg"
+      >
+        Experience the magic of diverse cultures, ancient traditions, and breathtaking landscapes
+      </motion.p>
+
+      {/* Search Form */}
+      <motion.form
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        onSubmit={handleSearch}
+        className="w-full max-w-3xl relative"
+      >
+        <div className="relative flex items-center group">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Where in Bharat do you want to explore?"
+            className="w-full px-8 py-6 text-xl rounded-full
+              focus:ring-4 focus:ring-primary-500/30 dark:focus:ring-primary-500/20
+              focus:border-primary-500 dark:focus:border-primary-400
+              focus:outline-none font-body 
+              text-gray-800 dark:text-white 
+              placeholder-gray-400 dark:placeholder-gray-500
+              bg-white/90 dark:bg-navy-800/90
+              border-2 border-gray-100 dark:border-navy-700
+              group-hover:border-primary-500/50 dark:group-hover:border-primary-500/30
+              shadow-[0_8px_16px_rgb(0_0_0_/_0.1)] dark:shadow-[0_8px_24px_rgb(0_0_0_/_0.3)]
+              backdrop-blur-sm
+              transition-all duration-300 animate-pulse"
+          />
+          <button
+            type="submit"
+            className="absolute right-2 top-1/2 -translate-y-1/2 
+              px-8 py-3 rounded-full
+              bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500
+              dark:from-primary-600 dark:via-primary-500 dark:to-primary-600
+              hover:from-primary-600 hover:via-primary-500 hover:to-primary-600
+              dark:hover:from-primary-500 dark:hover:via-primary-400 dark:hover:to-primary-500
+              text-white font-medium text-lg
+              focus:outline-none focus:ring-4 focus:ring-primary-500/30 dark:focus:ring-primary-500/20
+              flex items-center gap-3
+              shadow-[0_4px_12px_rgb(255_153_51_/_0.3)] dark:shadow-[0_4px_16px_rgb(255_153_51_/_0.4)]
+              hover:shadow-[0_6px_16px_rgb(255_153_51_/_0.4)] dark:hover:shadow-[0_6px_20px_rgb(255_153_51_/_0.5)]
+              transition-all duration-300 transform hover:scale-105"
+          >
+            <FaSearch className="w-5 h-5" />
+            <span>Explore Now</span>
+          </button>
         </div>
+      </motion.form>
 
-        {/* Brief About Section */}
-        <section className="py-16 bg-white dark:bg-navy-900">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="max-w-4xl mx-auto text-center"
+
+    </div>
+  </div>
+
+
+      {/* Brief About Section */}
+      <section className="py-16 bg-white dark:bg-navy-900">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-navy-500 dark:text-primary-200 mb-6">
+              Welcome to TraviBharat
+            </h2>
+            <p className="font-body text-lg text-text-secondary dark:text-white/70 mb-8">
+              Your gateway to experiencing the vibrant soul of Bharat. We curate authentic travel experiences 
+              that connect you with our rich heritage, diverse cultures, and breathtaking landscapes. From ancient 
+              temples to modern cities, from Himalayan peaks to coastal paradises, let us guide you through the 
+              incredible journey of discovering Bharat.
+            </p>
+            <Link
+              to="/about"
+              className="inline-flex items-center px-6 py-3 text-lg font-medium rounded-full text-white bg-primary-500 dark:bg-primary-600 hover:bg-primary-600 dark:hover:bg-primary-700 transition-colors"
             >
-              <h2 className="font-heading text-3xl md:text-4xl font-bold text-navy-500 dark:text-primary-200 mb-6">
-                Welcome to TraviBharat
-              </h2>
-              <p className="font-body text-lg text-text-secondary dark:text-white/70 mb-8">
-                Your gateway to experiencing the vibrant soul of Bharat. We curate authentic travel experiences 
-                that connect you with our rich heritage, diverse cultures, and breathtaking landscapes. From ancient 
-                temples to modern cities, from Himalayan peaks to coastal paradises, let us guide you through the 
-                incredible journey of discovering Bharat.
-              </p>
-              <Link
-                to="/about"
-                className="inline-flex items-center px-6 py-3 text-lg font-medium rounded-full text-white bg-primary-500 dark:bg-primary-600 hover:bg-primary-600 dark:hover:bg-primary-700 transition-colors"
-              >
-                Learn More About Us
-                <FaArrowRight className="ml-2" />
-              </Link>
-            </motion.div>
-          </div>
-        </section>
+              Learn More About Us
+              <FaArrowRight className="ml-2" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
 
-        {/* Featured Destinations */}
-        <section className={`py-20 ${isDarkMode ? 'dark:bg-navy-900' : 'bg-surface-light'}`}>
-          <div className="container mx-auto px-4">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="font-heading text-4xl font-bold text-navy-500 dark:text-primary-200 mb-4">
-                Featured Destinations
-              </h2>
-              <p className="font-body text-lg text-text-secondary dark:text-white/70 max-w-2xl mx-auto">
-                Explore our handpicked selection of Bharat's most captivating destinations
-              </p>
-            </motion.div>
-            <FeaturedDestinations />
-          </div>
-        </section>
-      </div>
+      {/* Featured Destinations */}
+      <section className="py-20 bg-surface-light dark:bg-navy-900">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="font-heading text-4xl font-bold text-navy-500 dark:text-primary-200 mb-4">
+              Featured Destinations
+            </h2>
+            <p className="font-body text-lg text-text-secondary dark:text-white/70 max-w-2xl mx-auto">
+              Explore our handpicked selection of Bharat's most captivating destinations
+            </p>
+          </motion.div>
+          <FeaturedDestinations />
+        </div>
+      </section>
 
-      {/* Updated Categories Section */}
-      <section className={`py-20 ${isDarkMode ? 'dark:bg-navy-900' : 'bg-surface-light'}`}>
+      {/* Categories Section */}
+      <section className="py-20 bg-white dark:bg-navy-800">
         <div className="container mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -367,8 +443,7 @@ useEffect(() => {
       </section>
 
       {/* Services Section */}
-
-      <section className={`py-20 ${isDarkMode ? 'dark:bg-navy-900' : 'bg-surface-light'}`}>
+      <section className="py-20 bg-surface-light dark:bg-navy-900">
         <div className="container mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -401,7 +476,7 @@ useEffect(() => {
                   <div className={`${service.color} mb-4 transform transition-transform group-hover:scale-110`}>
                     {service.icon}
                   </div>
-                  <span className={`text-lg font-medium ${isDarkMode ? 'text-text-primary' : 'text-text-primary'}`}>{service.name}</span>
+                  <span className="text-lg font-medium text-text-primary dark:text-white">{service.name}</span>
                 </Link>
               </motion.div>
             ))}

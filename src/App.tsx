@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { AccessibilityProvider } from './contexts/AccessibilityContext';
+import { ThemeProvider } from './context/ThemeContext';
 import PrivateRoute from './components/auth/PrivateRoute';
 import AdminRoute from './components/auth/AdminRoute';
 
@@ -74,123 +75,125 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AccessibilityProvider>
-          <Routes>
-            {/* Main Pages */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/blog/:postId" element={<BlogPost />} />
-            <Route path="/forum" element={<ForumPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
+        <ThemeProvider>
+          <AccessibilityProvider>
+            <Routes>
+              {/* Main Pages */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:postId" element={<BlogPost />} />
+              <Route path="/forum" element={<ForumPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
 
-            {/* Authentication */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+              {/* Authentication */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
 
-            {/* User Account - Protected Routes */}
-            <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-            <Route path="/profile/:userId" element={<ProfilePage />} />
-            <Route path="/bookings" element={<PrivateRoute><BookingsPage /></PrivateRoute>} />
-            <Route path="/wishlist" element={<PrivateRoute><WishlistPage /></PrivateRoute>} />
-            <Route path="/travel-history" element={<PrivateRoute><TravelHistoryPage /></PrivateRoute>} />
-            <Route path="/reviews" element={<PrivateRoute><ReviewsPage /></PrivateRoute>} />
+              {/* User Account - Protected Routes */}
+              <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+              <Route path="/profile/:userId" element={<ProfilePage />} />
+              <Route path="/bookings" element={<PrivateRoute><BookingsPage /></PrivateRoute>} />
+              <Route path="/wishlist" element={<PrivateRoute><WishlistPage /></PrivateRoute>} />
+              <Route path="/travel-history" element={<PrivateRoute><TravelHistoryPage /></PrivateRoute>} />
+              <Route path="/reviews" element={<PrivateRoute><ReviewsPage /></PrivateRoute>} />
 
-            {/* Destinations */}
-            <Route path="/destinations" element={<DestinationsPage />} />
-            <Route path="/destination/:id" element={<DestinationPage />} />
-            <Route path="/category/:category" element={<CategoryPage />} />
-            <Route path="/regions/:region" element={<RegionPage />} />
+              {/* Destinations */}
+              <Route path="/destinations" element={<DestinationsPage />} />
+              <Route path="/destination/:id" element={<DestinationPage />} />
+              <Route path="/category/:category" element={<CategoryPage />} />
+              <Route path="/regions/:region" element={<RegionPage />} />
 
-            {/* Activities */}
-            <Route path="/activities" element={<ActivitiesPage />} />
-            <Route path="/activities/:activity" element={<ActivityDetailPage />} />
+              {/* Activities */}
+              <Route path="/activities" element={<ActivitiesPage />} />
+              <Route path="/activities/:activity" element={<ActivityDetailPage />} />
 
-            {/* Festivals */}
-            <Route path="/festivals" element={<FestivalsPage />} />
-            <Route path="/festivals/:festival" element={<FestivalDetailPage />} />
+              {/* Festivals */}
+              <Route path="/festivals" element={<FestivalsPage />} />
+              <Route path="/festivals/:festival" element={<FestivalDetailPage />} />
 
-            {/* Travel Services */}
-            <Route path="/services/flights" element={<FlightsPage />} />
-            <Route path="/services/hotels" element={<HotelsPage />} />
-            <Route path="/services/car-rentals" element={<CarRentalsPage />} />
-            <Route path="/services/tour-packages" element={<TourPackagesPage />} />
-            <Route path="/services/insurance" element={<InsurancePage />} />
-            <Route path="/services/visa" element={<VisaServicesPage />} />
+              {/* Travel Services */}
+              <Route path="/services/flights" element={<FlightsPage />} />
+              <Route path="/services/hotels" element={<HotelsPage />} />
+              <Route path="/services/car-rentals" element={<CarRentalsPage />} />
+              <Route path="/services/tour-packages" element={<TourPackagesPage />} />
+              <Route path="/services/insurance" element={<InsurancePage />} />
+              <Route path="/services/visa" element={<VisaServicesPage />} />
 
-            {/* Travel Resources */}
-            <Route path="/resources/guides" element={<GuidesPage />} />
-            <Route path="/resources/weather" element={<WeatherPage />} />
-            <Route path="/resources/tips" element={<TipsPage />} />
-            <Route path="/resources/faqs" element={<FAQPage />} />
-            <Route path="/resources/safety" element={<SafetyPage />} />
-            <Route path="/resources/currency" element={<CurrencyPage />} />
+              {/* Travel Resources */}
+              <Route path="/resources/guides" element={<GuidesPage />} />
+              <Route path="/resources/weather" element={<WeatherPage />} />
+              <Route path="/resources/tips" element={<TipsPage />} />
+              <Route path="/resources/faqs" element={<FAQPage />} />
+              <Route path="/resources/safety" element={<SafetyPage />} />
+              <Route path="/resources/currency" element={<CurrencyPage />} />
 
-            {/* Legal Pages */}
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/cookies" element={<CookiesPage />} />
-            <Route path="/cancellation" element={<CancellationPage />} />
-            <Route path="/refund" element={<RefundPage />} />
+              {/* Legal Pages */}
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/cookies" element={<CookiesPage />} />
+              <Route path="/cancellation" element={<CancellationPage />} />
+              <Route path="/refund" element={<RefundPage />} />
 
-            <Route path ="tools" element={<ToolsPage/>} />
-            <Route path="/sitemap" element={<SitemapPage />} />
+              <Route path ="tools" element={<ToolsPage/>} />
+              <Route path="/sitemap" element={<SitemapPage />} />
 
-            {/* Admin Routes */}
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <Navigate to="/admin/dashboard" replace />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/dashboard"
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <AdminRoute>
-                  <UserManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/destinations"
-              element={
-                <AdminRoute>
-                  <DestinationManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/blogs"
-              element={
-                <AdminRoute>
-                  <BlogManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/add-sample-data"
-              element={
-                <AdminRoute>
-                  <AddSampleData />
-                </AdminRoute>
-              }
-            />
+              {/* Admin Routes */}
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <Navigate to="/admin/dashboard" replace />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminRoute>
+                    <UserManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/destinations"
+                element={
+                  <AdminRoute>
+                    <DestinationManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/blogs"
+                element={
+                  <AdminRoute>
+                    <BlogManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/add-sample-data"
+                element={
+                  <AdminRoute>
+                    <AddSampleData />
+                  </AdminRoute>
+                }
+              />
 
-            {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AccessibilityProvider>
+              {/* Catch all route */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </AccessibilityProvider>
+        </ThemeProvider>
       </AuthProvider>
     </Router>
   );
