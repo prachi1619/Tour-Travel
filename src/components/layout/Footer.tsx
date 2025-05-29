@@ -1,173 +1,256 @@
 import { Link } from 'react-router-dom';
-import { Compass, Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { Compass, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Youtube, Linkedin } from 'lucide-react';
 
 interface NavigationProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }
 
-
-
 export const Footer: React.FC<NavigationProps> = ({ isDarkMode, toggleDarkMode }) => {
-  console.log('Footer rendered with isDarkMode:', isDarkMode);
+  const siteMap = {
+    'Explore Bharat': [
+      { name: 'Destinations', path: '/destinations' },
+      { name: 'Regional Guides', path: '/regions' },
+      { name: 'Travel Packages', path: '/packages' },
+      { name: 'Pilgrimage Tours', path: '/pilgrimage' },
+      { name: 'Festivals & Events', path: '/festivals' },
+      { name: 'Popular Activities', path: '/activities' }
+    ],
+    'Travel Services': [
+      { name: 'Flight Bookings', path: '/services/flights' },
+      { name: 'Hotel Bookings', path: '/services/hotels' },
+      { name: 'Car Rentals', path: '/services/car-rentals' },
+      { name: 'Tour Packages', path: '/services/tour-packages' },
+      { name: 'Travel Insurance', path: '/services/insurance' },
+      { name: 'Visa Services', path: '/services/visa' }
+    ],
+    'Travel Resources': [
+      { name: 'Travel Guides', path: '/resources/guides' },
+      { name: 'Weather Updates', path: '/resources/weather' },
+      { name: 'Travel Tips', path: '/resources/tips' },
+      { name: 'FAQs', path: '/resources/faqs' },
+      { name: 'Safety Information', path: '/resources/safety' },
+      { name: 'Currency Converter', path: '/resources/currency' }
+    ],
+    'About TraviBharat': [
+      { name: 'Our Story', path: '/about' },
+      { name: 'Contact Us', path: '/contact' },
+      { name: 'Careers', path: '/careers' },
+      { name: 'Press & Media', path: '/press' },
+      { name: 'Blog', path: '/blog' },
+      { name: 'Forum', path: '/forum' }
+    ],
+    'Legal': [
+      { name: 'Terms of Service', path: '/terms' },
+      { name: 'Privacy Policy', path: '/privacy' },
+      { name: 'Cookie Policy', path: '/cookies' },
+      { name: 'Cancellation Policy', path: '/cancellation' },
+      { name: 'Refund Policy', path: '/refund' }
+    ],
+    'Account': [
+      { name: 'Login', path: '/login' },
+      { name: 'Sign Up', path: '/signup' },
+      { name: 'Profile', path: '/profile' },
+      { name: 'My Bookings', path: '/bookings' },
+      { name: 'Wishlist', path: '/wishlist' },
+      { name: 'Travel History', path: '/travel-history' }
+    ]
+  };
+
   return (
-    // <footer className="bg-gray-900 dark:bg-white text-white dark:text-navy-900 pt-12 pb-6 transition-colors duration-300">
-    <footer className={`pt-12 pb-6 transition-colors duration-300 ${isDarkMode ? 'black' : ''}`}>
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand Column */}
-          <div>
-            <Link to="/" className="flex items-center space-x-2 mb-4">
-              <Compass size={28} className="text-primary-500" />
-              <span className ={`text-xl font-heading font-bold bg-gradient-to-r from-primary-500 via-navy-500 to-secondary-500 bg-clip-text text-transparent`}>
-                TraviBharat
-              </span>
-            </Link>
-            <p className={` mb-4 transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'dark:text-gray-600'}`}>
-              Discover the incredible diversity of India - from majestic mountains 
-              to serene beaches, ancient temples to vibrant festivals.
+    <footer className={`relative ${isDarkMode ? 'bg-navy-950' : 'bg-gray-50'}`}>
+      {/* Newsletter Section */}
+      <div className={`w-full py-12 ${isDarkMode ? 'bg-navy-900/50' : 'bg-white'}`}>
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h3 className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-[#FF9933]' : 'text-[#000080]'}`}>
+              Subscribe to Our Newsletter
+            </h3>
+            <p className={`mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Stay updated with the latest travel guides and offers from across India
             </p>
-            <div className="flex space-x-4">
-              <a 
-                href="#" 
-                className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300"
-                aria-label="Facebook"
+            <div className="flex gap-3">
+              <input 
+                type="email" 
+                placeholder="Enter your email address" 
+                className={`flex-1 px-4 py-3 rounded-lg text-sm
+                  ${isDarkMode 
+                    ? 'bg-navy-800 border-navy-700 text-gray-300 placeholder-gray-500' 
+                    : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}
+                  border focus:outline-none focus:ring-2 focus:ring-[#FF9933]`}
+              />
+              <button 
+                type="submit" 
+                className="px-8 py-3 rounded-lg font-medium text-white
+                  bg-gradient-to-r from-[#FF9933] to-[#138808]
+                  hover:from-[#138808] hover:to-[#FF9933]
+                  transition-all duration-500"
               >
-                <Facebook size={20} />
-              </a>
-              <a 
-                href="#" 
-                className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300"
-                aria-label="Instagram"
-              >
-                <Instagram size={20} />
-              </a>
-              <a 
-                href="#" 
-                className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300"
-                aria-label="Twitter"
-              >
-                <Twitter size={20} />
-              </a>
+                Subscribe
+              </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Destinations Column */}
-          <div>
-            <h3 className={`text-lg font-semibold mb-4 border-b  pb-2 transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'dark:text-gray-600'}`}>
-              Popular Destinations
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/destination/taj-mahal-agra" className={`text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300`}>
-                  Taj Mahal, Agra
-                </Link>
-              </li>
-              <li>
-                <Link to="/destination/varanasi" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  Varanasi
-                </Link>
-              </li>
-              <li>
-                <Link to="/destination/jaipur" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  Jaipur
-                </Link>
-              </li>
-              <li>
-                <Link to="/destination/goa" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  Goa
-                </Link>
-              </li>
-              <li>
-                <Link to="/destination/kerala-backwaters" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  Kerala Backwaters
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Quick Links Column */}
-          <div>
-            {/* <h3 className="text-lg font-semibold mb-4 border-b border-gray-800 dark:border-gray-300 pb-2"> */}
-            <h3 className={`text-lg font-semibold mb-4 border-b pb-2 transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'dark:text-gray-600'}`}>
-              Quick Links
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/about" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/blog" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link to="/destinations" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  Destinations
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  FAQ
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Column */}
-          <div>
-            {/* <h3 className="text-lg font-semibold mb-4 border-b border-gray-800 dark:border-gray-300 pb-2"> */}
-            <h3 className={`text-lg font-semibold mb-4 border-b pb-2 transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'dark:text-gray-600'}`}>
-              Contact Us
-            </h3>
-            <ul className="space-y-3">
-              <li className="flex items-start space-x-3">
-                <MapPin size={20} className="text-primary-500 dark:text-primary-600 shrink-0 mt-1" />
-                <span className="text-gray-400 dark:text-gray-600">
-                  123 Travel Street, New Delhi, India
+      {/* Main Footer - Enhanced with Sitemap */}
+      <div className={`w-full py-16 ${isDarkMode ? 'bg-navy-900' : 'bg-white'}`}>
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-12 gap-x-8 gap-y-12">
+            {/* Brand Column */}
+            <div className="col-span-12 lg:col-span-3 pr-8">
+              <Link to="/" className="flex items-center space-x-3 mb-6">
+                <div className="p-2.5 bg-gradient-to-br from-[#FF9933] to-[#138808] rounded-xl">
+                  <Compass size={28} className="text-white" />
+                </div>
+                <span className="text-2xl font-heading font-bold tracking-tight">
+                  {isDarkMode ? (
+                    <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent">
+                      TraviBharat
+                    </span>
+                  ) : (
+                    <span className="bg-gradient-to-r from-[#FF9933] via-[#000080] to-[#138808] bg-clip-text text-transparent">
+                      TraviBharat
+                    </span>
+                  )}
                 </span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <Phone size={20} className="text-primary-500 dark:text-primary-600 shrink-0" />
-                <span className="text-gray-400 dark:text-gray-600">+91 1234 567890</span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <Mail size={20} className="text-primary-500 dark:text-primary-600 shrink-0" />
-                <a href="mailto:info@incredibleindia.com" className="text-gray-400 dark:text-gray-600 hover:text-primary-500 dark:hover:text-primary-600 transition duration-300">
-                  info@incredibleindia.com
+              </Link>
+              <p className={`mb-8 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                Experience the vibrant tapestry of India with TraviBharat - your gateway to discovering 
+                the rich heritage, stunning landscapes, and diverse cultures of this magnificent country.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <SocialLink href="#" icon={<Facebook size={18} />} isDarkMode={isDarkMode} />
+                <SocialLink href="#" icon={<Instagram size={18} />} isDarkMode={isDarkMode} />
+                <SocialLink href="#" icon={<Twitter size={18} />} isDarkMode={isDarkMode} />
+                <SocialLink href="#" icon={<Youtube size={18} />} isDarkMode={isDarkMode} />
+                <SocialLink href="#" icon={<Linkedin size={18} />} isDarkMode={isDarkMode} />
+              </div>
+            </div>
+
+            {/* Sitemap Columns - Expanded to show more categories */}
+            <div className="col-span-12 lg:col-span-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                {Object.entries(siteMap).map(([title, links]) => (
+                  <div key={title}>
+                    <h4 className={`font-bold text-lg mb-4 
+                      ${isDarkMode ? 'text-[#FF9933]' : 'text-[#000080]'}`}>
+                      {title}
+                    </h4>
+                    <ul className="space-y-3">
+                      {links.map((link) => (
+                        <li key={link.name}>
+                          <Link
+                            to={link.path}
+                            className={`text-sm group
+                              ${isDarkMode 
+                                ? 'text-gray-400 hover:text-[#FF9933]' 
+                                : 'text-gray-600 hover:text-[#138808]'}
+                              transition-colors duration-300 flex items-start`}
+                          >
+                            <span className="block w-2 h-2 mt-1.5 mr-2 rounded-full bg-current opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            <span>{link.name}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact Column */}
+            <div className="col-span-12 lg:col-span-3">
+              <h4 className={`font-bold text-lg mb-6
+                ${isDarkMode ? 'text-[#FF9933]' : 'text-[#000080]'}`}>
+                Get in Touch
+              </h4>
+              <div className="space-y-6">
+                <a href="tel:+919876543210" 
+                  className={`flex items-center space-x-4 group
+                    ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className={`p-3 rounded-lg group-hover:bg-[#FF9933] transition-colors
+                    ${isDarkMode ? 'bg-navy-800' : 'bg-gray-100'}`}>
+                    <Phone size={18} className="group-hover:text-white transition-colors" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Call Us</p>
+                    <p className="group-hover:text-[#FF9933] transition-colors">+91 98765 43210</p>
+                  </div>
                 </a>
-              </li>
-            </ul>
-            <div className="mt-6">
-              <h4 className={`text-lg font-semibold mb-2 transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'dark:text-gray-600'}`}>Subscribe to our Newsletter</h4>
-              <div className="flex">
-                <input 
-                  type="email" 
-                  placeholder="Your email" 
-                  className="bg-gray-800 dark:bg-gray-200 text-white dark:text-navy-900 px-4 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary-500 flex-grow"
-                />
-                <button 
-                  type="submit" 
-                  className="bg-primary-500 dark:bg-primary-600 hover:bg-primary-600 dark:hover:bg-primary-700 px-4 py-2 rounded-r-md transition duration-300 text-white dark:text-white"
-                >
-                  Subscribe
-                </button>
+                <a href="mailto:info@travibharat.com" 
+                  className={`flex items-center space-x-4 group
+                    ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className={`p-3 rounded-lg group-hover:bg-[#138808] transition-colors
+                    ${isDarkMode ? 'bg-navy-800' : 'bg-gray-100'}`}>
+                    <Mail size={18} className="group-hover:text-white transition-colors" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Email Us</p>
+                    <p className="group-hover:text-[#138808] transition-colors">info@travibharat.com</p>
+                  </div>
+                </a>
+                <div className={`flex items-center space-x-4
+                  ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-navy-800' : 'bg-gray-100'}`}>
+                    <MapPin size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Location</p>
+                    <p>New Delhi, India</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="border-t border-gray-800 dark:border-gray-300 mt-10 pt-6 text-center text-gray-500 dark:text-gray-700 text-sm">
-          <p>&copy; {new Date().getFullYear()} Incredible India. All rights reserved.</p>
+      {/* Bottom Bar */}
+      <div className={`py-6 border-t ${isDarkMode ? 'border-navy-800 bg-navy-950' : 'border-gray-100 bg-gray-50'}`}>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className={`text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+              &copy; {new Date().getFullYear()} TraviBharat. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6">
+              <Link to="/privacy" className={`text-sm hover:text-[#FF9933] transition-colors
+                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className={`text-sm hover:text-[#FF9933] transition-colors
+                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                Terms of Service
+              </Link>
+              <Link to="/sitemap" className={`text-sm hover:text-[#FF9933] transition-colors
+                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                Sitemap
+              </Link>
+              <div className="h-4 w-16 bg-gradient-to-r from-[#FF9933] via-white to-[#138808] rounded-full"></div>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
   );
-}
+};
+
+const SocialLink: React.FC<{ href: string; icon: React.ReactNode; isDarkMode: boolean }> = ({ 
+  href, 
+  icon,
+  isDarkMode 
+}) => (
+  <a 
+    href={href} 
+    className={`p-3 rounded-lg 
+      ${isDarkMode ? 'bg-navy-800' : 'bg-gray-100'}
+      text-gray-600 dark:text-gray-400 
+      hover:bg-gradient-to-r hover:from-[#FF9933] hover:to-[#138808]
+      hover:text-white transform hover:-translate-y-1
+      transition-all duration-300`}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    {icon}
+  </a>
+);

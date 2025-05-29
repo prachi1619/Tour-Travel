@@ -1,141 +1,170 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ProfileDropdown from './ProfileDropdown';
-import { FaSun, FaMoon } from 'react-icons/fa';
+import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
 
 interface NavigationProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }
 
-
-
 const Navigation: React.FC<NavigationProps> = ({ isDarkMode, toggleDarkMode }) => {
-  const { currentUser, isAdmin } = useAuth();
+  const { currentUser } = useAuth();
   const location = useLocation();
-  
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
-
   if (isAdminRoute) return null;
 
+  const gradientText = isDarkMode
+    ? 'bg-gradient-to-r from-[#FF9933] via-white to-[#138808]'
+    : 'bg-gradient-to-r from-[#FF9933] via-[#000080] to-[#138808]';
+
   return (
-    // <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 bg-navy-900/95 backdrop-blur-lg shadow-sm">
-    //handle light and dark mode
-    <nav className={`fixed top-0 left-0 right-0 z-50 bg-white dark:bg-navy-900/95 backdrop-blur-lg shadow-sm transition-colors duration-200 ${isDarkMode ? 'dark' : ''}`}>
-
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 backdrop-blur-md
+        ${isDarkMode ? 'bg-navy-950/95 border-b border-navy-800' : 'bg-white/95 border-b border-gray-200'}`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo - Left */}
-          <div className="flex-shrink-0">
-            <Link to="/" className="flex items-center">
-              <span className="font-brand text-2xl font-bold bg-gradient-to-r from-primary-500 via-navy-500 to-secondary-500 bg-clip-text text-transparent">
-                TraviBharat
-              </span>
+        <div className="flex items-center justify-between h-16 w-full">
+          {/* Logo + NavLinks */}
+          <div className="flex items-center space-x-4">
+            <Link to="/" className="text-2xl font-bold font-heading flex-shrink-0 ml-4">
+              <span className={`${gradientText} bg-clip-text text-transparent`}>TraviBharat</span>
             </Link>
-          </div>
 
-          {/* Navigation Links - Center */}
-          <div className="hidden md:flex flex-1 justify-center">
-            <div className="flex space-x-8">
-              <NavLink to="/" exact>Home</NavLink>
-              <NavLink to="/about">About</NavLink>
-              <NavLink to="/blog">Blogs</NavLink>
-              <NavLink to="/destinations">Destinations</NavLink>
-              <NavLink to="/tools">Tools</NavLink>
-              {/* {isAdmin() && <NavLink to="/admin">Admin</NavLink>} */}
+            {/* Nav Links - Centered vertically */}
+            <div className="hidden lg:flex space-x-6 text-base   h-16 items-center">
+              {['/', '/about', '/destinations', '/blog', '/tools', '/contact'].map((path, idx) => (
+                <NavLink key={path} to={path} isDarkMode={isDarkMode} exact={path === '/'}>
+                  {['Home', 'About Us', 'Destinations', 'Travel Blogs', 'Travel Tools', 'Contact Us'][idx]}
+                </NavLink>
+              ))}
             </div>
           </div>
 
-          {/* Right Side Items */}
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-full text-navy-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-navy-800 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
-              aria-label={isDarkMode ? 'Switch to dark mode' : 'Switch to light mode'}
-            >
-              {isDarkMode ? <FaMoon size={20} /> : <FaSun size={20} />}
-            </button>
+          {/* Search + Auth + Theme Toggle */}
+          <div className="flex items-center gap-2">
+            {/* Search Bar - Removed border styling on hover */}
+            <div className="hidden md:flex w-[200px]">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  placeholder="Search for places, activities, or guides..."
+                  className={`w-full pl-10 pr-4 py-2 rounded-lg transition duration-200 text-base
+                    ${isDarkMode ? 'bg-navy-800 text-gray-200 border border-navy-700 placeholder-gray-400' : 'bg-gray-100 text-gray-900 border border-gray-300 placeholder-gray-500'}
+                    ${isSearchFocused ? 'ring-2 ring-[#FF9933]' : ''}`}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                />
+                <FaSearch className={`absolute left-3 top-3.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+              </div>
+            </div>
 
             {currentUser ? (
               <ProfileDropdown />
             ) : (
-              <div className="flex items-center space-x-4">
-                <Link
-                  to="/login"
-                  className="text-navy-500 dark:text-gray-300 hover:text-navy-700 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors"
+              <div className="flex items-center space-x-3">
+                {/* More interactive login/signup buttons */}
+                <Link 
+                  to="/login" 
+                  className={`text-base font-medium px-3 py-1.5 rounded-md transition
+                    ${isDarkMode ? 'text-white hover:bg-navy-700' : 'text-gray-800 hover:bg-gray-200'}`}
                 >
                   Login
                 </Link>
-                <Link
-                  to="/signup"
-                  className="bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+                <Link 
+                  to="/signup" 
+                  className={`text-base font-medium px-3 py-1.5 rounded-md transition
+                    ${isDarkMode 
+                      ? 'bg-[#FF9933] text-white hover:bg-[#e68a2e]' 
+                      : 'bg-[#FF9933] text-white hover:bg-[#e68a2e]'}`}
                 >
                   Sign Up
                 </Link>
               </div>
             )}
+
+            {/* Larger theme toggle icon */}
+            <button 
+              onClick={toggleDarkMode} 
+              aria-label="Toggle theme"
+              className={`p-2 rounded-full transition
+                ${isDarkMode ? 'hover:bg-navy-700' : 'hover:bg-gray-200'}`}
+            >
+              {isDarkMode ? (
+                <FaMoon className="text-white text-xl" />
+              ) : (
+                <FaSun className="text-gray-800 text-xl" />
+              )}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      <div className="md:hidden border-t border-gray-200 dark:border-navy-800">
-        <div className="grid grid-cols-4 gap-1 px-2 py-3">
-          <MobileNavLink to="/" exact>Home</MobileNavLink>
-          <MobileNavLink to="/destinations">Destinations</MobileNavLink>
-          <MobileNavLink to="/blog">Blog</MobileNavLink>
-          <MobileNavLink to="/travel-tools">Travel</MobileNavLink>
-          {isAdmin() && (
-            <div className="col-span-4">
-              <MobileNavLink to="/admin">Admin Dashboard</MobileNavLink>
-            </div>
-          )}
+      {/* Mobile Menu */}
+      <div className="md:hidden border-t border-gray-200 dark:border-navy-800 px-4 py-2">
+        <div className="grid grid-cols-5 gap-3">
+          {['/', '/about', '/destinations', '/blog', '/contact'].map((path, idx) => (
+            <MobileNavLink key={path} to={path} isDarkMode={isDarkMode} exact={path === '/'}>
+              {['Home', 'About Us', 'Explore', 'Blog', 'Contact'][idx]}
+            </MobileNavLink>
+          ))}
         </div>
       </div>
     </nav>
   );
 };
 
-const NavLink: React.FC<{ to: string; exact?: boolean; children: React.ReactNode }> = ({
-  to,
-  exact,
-  children
-}) => {
+// Rest of the code remains the same (NavLink and MobileNavLink components)
+interface NavLinkProps {
+  to: string;
+  exact?: boolean;
+  children: React.ReactNode;
+  isDarkMode: boolean;
+}
+
+const NavLink: React.FC<NavLinkProps> = ({ to, exact, children, isDarkMode }) => {
   const location = useLocation();
   const isActive = exact ? location.pathname === to : location.pathname.startsWith(to);
+
+  const gradientText = isDarkMode
+    ? 'bg-gradient-to-r from-[#FF9933] via-white to-[#138808]'
+    : 'bg-gradient-to-r from-[#FF9933] via-[#000080] to-[#138808]';
 
   return (
     <Link
       to={to}
-      className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-full transition-colors ${
-        isActive
-          ? 'bg-primary-50 text-navy-500 dark:bg-primary-900/20 dark:text-primary-400'
-          : 'text-navy-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-navy-800 hover:text-navy-500 dark:hover:text-gray-200'
-      }`}
+      className={`text-base font-medium transition duration-300 flex items-center h-full
+        ${isActive
+          ? `${gradientText} bg-clip-text text-transparent`
+          : isDarkMode
+            ? 'text-gray-400 hover:text-white'
+            : 'text-gray-700 hover:text-black'}`}
     >
       {children}
     </Link>
   );
 };
 
-const MobileNavLink: React.FC<{ to: string; exact?: boolean; children: React.ReactNode }> = ({
-  to,
-  exact,
-  children
-}) => {
+const MobileNavLink: React.FC<NavLinkProps> = ({ to, exact, children, isDarkMode }) => {
   const location = useLocation();
   const isActive = exact ? location.pathname === to : location.pathname.startsWith(to);
+
+  const gradientText = isDarkMode
+    ? 'bg-gradient-to-r from-[#FF9933] via-white to-[#138808]'
+    : 'bg-gradient-to-r from-[#FF9933] via-[#000080] to-[#138808]';
 
   return (
     <Link
       to={to}
-      className={`flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
-        isActive
-          ? 'bg-primary-50 text-navy-500 dark:bg-primary-900/20 dark:text-primary-400'
-          : 'text-navy-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-navy-800 hover:text-navy-500 dark:hover:text-gray-200'
-      }`}
+      className={`text-xs text-center font-medium transition duration-300
+        ${isActive
+          ? `${gradientText} bg-clip-text text-transparent`
+          : isDarkMode
+            ? 'text-gray-400 hover:text-white'
+            : 'text-gray-700 hover:text-black'}`}
     >
       {children}
     </Link>

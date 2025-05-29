@@ -340,143 +340,256 @@ const HomePage = () => {
 
 
       {/* Brief About Section */}
-      <section className="py-16 bg-white dark:bg-navy-900">
-        <div className="container mx-auto px-4">
+      <section className="relative py-24 overflow-hidden bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-navy-900 dark:via-navy-800 dark:to-navy-900">
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#FF9933]/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#138808]/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-[#000080]/20 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="container relative mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-4xl mx-auto"
           >
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-navy-500 dark:text-primary-200 mb-6">
-              Welcome to TraviBharat
-            </h2>
-            <p className="font-body text-lg text-text-secondary dark:text-white/70 mb-8">
-              Your gateway to experiencing the vibrant soul of Bharat. We curate authentic travel experiences 
-              that connect you with our rich heritage, diverse cultures, and breathtaking landscapes. From ancient 
-              temples to modern cities, from Himalayan peaks to coastal paradises, let us guide you through the 
-              incredible journey of discovering Bharat.
-            </p>
-            <Link
-              to="/about"
-              className="inline-flex items-center px-6 py-3 text-lg font-medium rounded-full text-white bg-primary-500 dark:bg-primary-600 hover:bg-primary-600 dark:hover:bg-primary-700 transition-colors"
-            >
-              Learn More About Us
-              <FaArrowRight className="ml-2" />
-            </Link>
+            {/* Section Title with Flag Colors */}
+            <div className="text-center mb-12">
+              <h2 className="inline-block font-heading text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-[#FF9933] via-[#000080] to-[#138808] bg-clip-text text-transparent">
+                Welcome to TraviBharat
+              </h2>
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <div className="h-1 w-16 rounded-full bg-[#FF9933]"></div>
+                <div className="h-1 w-16 rounded-full bg-[#000080]"></div>
+                <div className="h-1 w-16 rounded-full bg-[#138808]"></div>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="bg-white/80 dark:bg-navy-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl dark:shadow-navy-700/20">
+              <p className="font-body text-lg text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
+                Your gateway to experiencing the vibrant soul of Bharat. We curate authentic travel experiences 
+                that connect you with our rich heritage, diverse cultures, and breathtaking landscapes. From ancient 
+                temples to modern cities, from Himalayan peaks to coastal paradises, let us guide you through the 
+                incredible journey of discovering Bharat.
+              </p>
+              
+              {/* Call to Action */}
+              <div className="text-center">
+                <Link
+                  to="/about"
+                  className="inline-flex items-center px-8 py-4 text-lg font-medium rounded-full 
+                    bg-gradient-to-r from-[#FF9933] via-[#FF9933] to-[#FF8000]
+                    dark:from-[#FF9933] dark:to-[#FF8000]
+                    text-white shadow-lg shadow-[#FF9933]/20
+                    hover:shadow-xl hover:shadow-[#FF9933]/30 
+                    transform hover:scale-105 transition-all duration-300"
+                >
+                  Learn More About Us
+                  <FaArrowRight className="ml-2 animate-pulse" />
+                </Link>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
 
       {/* Featured Destinations */}
-      <section className="py-20 bg-surface-light dark:bg-navy-900">
-        <div className="container mx-auto px-4">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-heading text-4xl font-bold text-navy-500 dark:text-primary-200 mb-4">
-              Featured Destinations
-            </h2>
-            <p className="font-body text-lg text-text-secondary dark:text-white/70 max-w-2xl mx-auto">
-              Explore our handpicked selection of Bharat's most captivating destinations
-            </p>
-          </motion.div>
-          <FeaturedDestinations />
+      <section className="relative py-24 overflow-hidden">
+        {/* Background with flag colors */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-navy-900 dark:via-navy-800 dark:to-navy-900">
+          {/* Decorative Patterns */}
+          <div className="absolute inset-0 opacity-5 bg-[url('/patterns/indian-pattern-light.png')] dark:bg-[url('/patterns/indian-pattern-dark.png')] bg-repeat"></div>
+          
+          {/* Flag Color Accents */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF9933]/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#138808]/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-[#000080]/10 rounded-full blur-3xl"></div>
         </div>
-      </section>
 
-      {/* Categories Section */}
-      <section className="py-20 bg-white dark:bg-navy-800">
-        <div className="container mx-auto px-4">
+        <div className="container relative mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-16"
           >
-            <h2 className="font-heading text-4xl font-bold text-navy-500 dark:text-primary-200 mb-4">
+            {/* Section Title */}
+            <h2 className="inline-block font-heading text-4xl md:text-5xl font-bold mb-6 
+              bg-gradient-to-r from-[#FF9933] via-[#000080] to-[#138808] bg-clip-text text-transparent">
               Explore Incredible Bharat
             </h2>
-            <p className="font-body text-lg text-text-secondary dark:text-white/70 max-w-2xl mx-auto">
-              Discover the perfect way to experience our rich heritage and natural beauty
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="h-1 w-16 rounded-full bg-[#FF9933]"></div>
+              <div className="h-1 w-16 rounded-full bg-[#000080]"></div>
+              <div className="h-1 w-16 rounded-full bg-[#138808]"></div>
+            </div>
+            <p className="font-body text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Discover the perfect way to experience our rich heritage and natural beauty through carefully curated travel categories
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-            {categories.map((category, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.03 }}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Link
-                  to={`/category/${category.name.toLowerCase()}`}
-                  className="block group h-full"
-                >
-                  <div className="relative h-full overflow-hidden rounded-2xl shadow-lg dark:shadow-xl">
-                    <div className="aspect-w-3 aspect-h-4 bg-gray-200 dark:bg-navy-800">
-                      <div
-                        className="w-full h-full bg-cover bg-center transform group-hover:scale-110 transition-transform duration-700"
-                        style={{ backgroundImage: `url(${category.bgImage})` }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80" />
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                      <div className={`inline-flex items-center justify-center p-3 rounded-full bg-gradient-to-r ${category.color} shadow-lg mb-4`}>
-                        {category.icon}
-                      </div>
-                      <h3 className="text-2xl font-heading font-bold mb-2">{category.name}</h3>
-                      <p className="text-sm text-white/90 line-clamp-2">{category.description}</p>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+          {/* Featured Destinations Component with Enhanced Wrapper */}
+          <div className="relative backdrop-blur-sm bg-white/40 dark:bg-navy-800/40 rounded-3xl p-8 shadow-2xl dark:shadow-navy-700/20">
+            <FeaturedDestinations />
+          </div>
+
+          {/* View All Button */}
+          <div className="text-center mt-12">
+            <Link
+              to="/destinations"
+              className="inline-flex items-center px-8 py-4 text-lg font-medium rounded-full 
+                bg-gradient-to-r from-[#138808] to-[#0D6A0D]
+                dark:from-[#138808] dark:to-[#0D6A0D]
+                text-white shadow-lg shadow-[#138808]/20
+                hover:shadow-xl hover:shadow-[#138808]/30 
+                transform hover:scale-105 transition-all duration-300
+                group"
+            >
+              Explore All Destinations
+              <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="py-20 bg-surface-light dark:bg-navy-900">
-        <div className="container mx-auto px-4">
+
+      {/* Regional Highlights Section */}
+      <section className="relative py-24 overflow-hidden">
+        {/* Background with flag colors */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-navy-900 dark:via-navy-800 dark:to-navy-900">
+          {/* Decorative Patterns */}
+          <div className="absolute inset-0 opacity-5 bg-[url('/patterns/indian-pattern-light.png')] dark:bg-[url('/patterns/indian-pattern-dark.png')] bg-repeat"></div>
+          
+          {/* Flag Color Accents */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF9933]/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#138808]/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-[#000080]/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="container relative mx-auto px-4">
+          {/* Section Header */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-16"
           >
-            <h2 className="font-heading text-4xl font-bold text-navy-500 dark:text-primary-200 mb-4">
-              Travel Services
-            </h2>
-            <p className="font-body text-lg text-text-secondary dark:text-white/70 max-w-2xl mx-auto">
-              Everything you need for a seamless travel experience across Bharat
+            <div className="inline-block">
+              <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">
+                <span className="text-[#FF9933]">Explore </span>
+                <span className="text-[#000080]">Regional </span>
+                <span className="text-[#138808]">Highlights</span>
+              </h2>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <div className="h-1 w-16 rounded-full bg-[#FF9933]"></div>
+                <div className="h-1 w-16 rounded-full bg-[#000080]"></div>
+                <div className="h-1 w-16 rounded-full bg-[#138808]"></div>
+              </div>
+            </div>
+            <p className="font-body text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mt-6">
+              Embark on a journey through the diverse landscapes and rich cultural heritage of Bharat's regions
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {services.map((service, index) => (
+          {/* Regional Highlights Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                name: "North India",
+                description: "Discover majestic Himalayas, ancient temples, and royal heritage palaces",
+                image: "/images/regions/north-india.webp",
+                highlights: ["Taj Mahal", "Varanasi", "Kashmir Valley"],
+                color: "bg-[#FF9933]"
+              },
+              {
+                name: "South India",
+                description: "Experience divine temples, serene backwaters, and pristine beaches",
+                image: "/images/regions/south-india.webp",
+                highlights: ["Kerala Backwaters", "Hampi", "Meenakshi Temple"],
+                color: "bg-[#138808]"
+              },
+              {
+                name: "East India",
+                description: "Explore tea gardens, sundarbans, and rich cultural traditions",
+                image: "/images/regions/east-india.webp",
+                highlights: ["Sundarbans", "Darjeeling", "Konark Temple"],
+                color: "bg-[#000080]"
+              },
+              {
+                name: "West India",
+                description: "Witness royal palaces, vast deserts, and vibrant culture",
+                image: "/images/regions/west-india.webp",
+                highlights: ["Rann of Kutch", "Goa Beaches", "Udaipur"],
+                color: "bg-[#FF9933]"
+              },
+              {
+                name: "Central India",
+                description: "Discover wildlife sanctuaries, ancient caves, and historical monuments",
+                image: "/images/regions/central-india.webp",
+                highlights: ["Khajuraho", "Bandhavgarh", "Sanchi Stupa"],
+                color: "bg-[#138808]"
+              },
+              {
+                name: "Northeast India",
+                description: "Experience unique tribal culture, mountains, and biodiversity",
+                image: "/images/regions/northeast-india.webp",
+                highlights: ["Kaziranga", "Tawang", "Living Root Bridges"],
+                color: "bg-[#000080]"
+              }
+            ].map((region, index) => (
               <motion.div
                 key={index}
-                whileHover={{ scale: 1.05 }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
+                className="group"
               >
                 <Link
-                  to={`/services/${service.name.toLowerCase()}`}
-                  className={`flex flex-col items-center p-8 rounded-2xl ${service.bgColor} ${service.hoverColor} transition-all duration-300`}
+                  to={`/regions/${region.name.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="block h-full overflow-hidden rounded-2xl 
+                    bg-white/80 dark:bg-navy-800/80 backdrop-blur-sm
+                    border border-white/20 dark:border-navy-700/20
+                    shadow-lg dark:shadow-xl
+                    hover:shadow-xl dark:hover:shadow-2xl
+                    transform hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div className={`${service.color} mb-4 transform transition-transform group-hover:scale-110`}>
-                    {service.icon}
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={region.image}
+                      alt={region.name}
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className={`absolute bottom-0 left-0 right-0 px-6 py-4 ${region.color}`}>
+                      <h3 className="text-2xl font-heading font-bold text-white">
+                        {region.name}
+                      </h3>
+                    </div>
                   </div>
-                  <span className="text-lg font-medium text-text-primary dark:text-white">{service.name}</span>
+                  
+                  <div className="p-6">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
+                      {region.description}
+                    </p>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        Popular Highlights:
+                      </h4>
+                      <ul className="flex flex-wrap gap-2">
+                        {region.highlights.map((highlight, i) => (
+                          <li key={i} className="text-sm px-3 py-1 rounded-full 
+                            bg-gray-100 dark:bg-navy-700
+                            text-gray-600 dark:text-gray-300">
+                            {highlight}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </Link>
               </motion.div>
             ))}
